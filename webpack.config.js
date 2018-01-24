@@ -49,6 +49,10 @@ module.exports = {
       {
         test: /\.json$/,
         loader: 'json-loader'
+      },
+      {
+        test: /\.min\.js$/,
+        loader: 'script-loader'
       }
     ]
   }
