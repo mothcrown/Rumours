@@ -1,8 +1,8 @@
-import playerImgPath from '../img/guestmale1.png'
+import playerImgPath from '../../img/guestmale1.png'
 
 const images = {}
 
-images.path = {
+images.lib = {
   player: playerImgPath
 }
 
