@@ -5,13 +5,12 @@ import images from './images'
 import './../phaser.min'
 
 let player
+let npcs
 let cursors
 
 function createPlayer(playState) {
-  player = playState.game.add.sprite(100, 100, 'player')
-  
+  player = playState.game.add.sprite(320, 400, 'player')
   player.anchor.set(0.5, 0.5)
-  
   playState.game.physics.enable(player, Phaser.Physics.ARCADE)
   player.enableBody = true
   player.body.collideWorldBounds = true
@@ -22,13 +21,32 @@ function createPlayer(playState) {
   player.animations.add('walkeast', [3], 30, true)
 }
 
+function generateNPCs() {
+  const npc = npcs.create(200, 200, 'guestmale1')
+  npc.anchor.set(0.5, 0.5)
+  npc.animations.add('walksouth', [0], 30, true)
+  npc.animations.add('walknorth', [1], 30, true)
+  npc.animations.add('walkwest', [2], 30, true)
+  npc.animations.add('walkeast', [3], 30, true)
+}
+
+function createNPCs(playState) {
+  npcs = playState.game.add.group()
+  npcs.physicsBodyType = Phaser.Physics.ARCADE
+  npcs.enableBody = true
+  player.body.collideWorldBounds = true
+  generateNPCs()
+}
+
 const playState = {
   preload: function () {
     this.game.load.spritesheet('player', images.lib.player, 44, 104)
+    this.game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
   },
   create: function () {
     this.game.physics.startSystem(Phaser.Physics.ARCADE)
     createPlayer(playState)
+    createNPCs(playState)
     cursors = this.game.input.keyboard.createCursorKeys()
     this.game.stage.backgroundColor = '#400000'
   },
