@@ -21,9 +21,26 @@ function createPlayer(playState) {
   player.animations.add('walkeast', [3], 30, true)
 }
 
+function playerMovement() {
+  player.body.velocity.x = 0
+  player.body.velocity.y = 0
+  if (cursors.left.isDown) {
+    player.body.velocity.x = -150
+    player.animations.play('walkwest')
+  } else if (cursors.right.isDown) {
+    player.body.velocity.x = 150
+    player.animations.play('walkeast')
+  } else if (cursors.up.isDown) {
+    player.body.velocity.y = -150
+    player.animations.play('walknorth')
+  } else if (cursors.down.isDown) {
+    player.body.velocity.y = 150
+    player.animations.play('walksouth')
+  }
+}
+
 function generateNPCs() {
   const npc = npcs.create(200, 200, 'guestmale1')
-  npc.anchor.set(0.5, 0.5)
   npc.animations.add('walksouth', [0], 30, true)
   npc.animations.add('walknorth', [1], 30, true)
   npc.animations.add('walkwest', [2], 30, true)
@@ -34,8 +51,22 @@ function createNPCs(playState) {
   npcs = playState.game.add.group()
   npcs.physicsBodyType = Phaser.Physics.ARCADE
   npcs.enableBody = true
-  player.body.collideWorldBounds = true
+  npcs.setAll('anchor.x', 0.5)
+  npcs.setAll('anchor.y', 0.5)
+  npcs.setAll('checkWorldBounds', true)
+  npcs.setAll('body.collideWorldBounds', true)
+  npcs.setAll('body.immovable', true)
+  npcs.setAll('allowGravity', false)
   generateNPCs()
+}
+
+function bumpIntoPeople(player1, npc) {
+  if (player1.body.y > npc.body.y + 20) {
+    player1.bringToTop()
+  }
+  if (player1.body.y + 20 < npc.body.y) {
+    player1.sendToBack()
+  }
 }
 
 const playState = {
@@ -45,27 +76,14 @@ const playState = {
   },
   create: function () {
     this.game.physics.startSystem(Phaser.Physics.ARCADE)
-    createPlayer(playState)
     createNPCs(playState)
+    createPlayer(playState)
     cursors = this.game.input.keyboard.createCursorKeys()
     this.game.stage.backgroundColor = '#400000'
   },
   update: function () {
-    player.body.velocity.x = 0
-    player.body.velocity.y = 0
-    if (cursors.left.isDown) {
-      player.body.velocity.x = -150
-      player.animations.play('walkwest')
-    } else if (cursors.right.isDown) {
-      player.body.velocity.x = 150
-      player.animations.play('walkeast')
-    } else if (cursors.up.isDown) {
-      player.body.velocity.y = -150
-      player.animations.play('walknorth')
-    } else if (cursors.down.isDown) {
-      player.body.velocity.y = 150
-      player.animations.play('walksouth')
-    }
+    playerMovement()
+    this.game.physics.arcade.overlap(player, npcs, bumpIntoPeople, null, this)
   }
 }
 
