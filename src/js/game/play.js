@@ -2,14 +2,20 @@
 /* eslint object-shorthand: ["error", "never"] */
 /* eslint no-param-reassign: [2, { "props": false }] */
 
+// Imports
 import images from './images'
 import './../phaser.min'
 
+// "Consts"
 let player
 let guests
 let cursors
 let timer
 
+/**
+ * Pretty much creates the player. It does that. What else do you need?
+ * @param {*} playState 
+ */
 function createPlayer(playState) {
   player = playState.game.add.sprite(320, 400, 'player')
   player.anchor.set(0.5, 0.5)
@@ -23,6 +29,12 @@ function createPlayer(playState) {
   player.animations.add('walkeast', [3], 30, true)
 }
 
+/**
+ * Player movement:
+ * I'm sure there is a nicer, far more elegant way to do this. Oh well!
+ * 
+ * ¯\_(ツ)_/¯
+ */
 function playerMovement() {
   player.body.velocity.x = 0
   player.body.velocity.y = 0
@@ -42,6 +54,11 @@ function playerMovement() {
   }
 }
 
+/**
+ * Quite like playerMovement only slower, because they are way cooler
+ * than you and they know it.
+ * @param {*} game 
+ */
 function guestsMovement(game) {
   guests.forEach((guest) => {
     const guest1 = guest
@@ -76,6 +93,10 @@ function guestsMovement(game) {
   timer = game.time.now
 }
 
+/**
+ * What kind of party has no guests? Certainly none I'd bother to go, I say!
+ * @param {*} playState 
+ */
 function generateGuests(playState) {
   for (let i = 0; i < 15; i += 1) {
     const guest = guests.create(playState.game.world.randomX, playState.game.world.randomY, 'guestmale1')
@@ -89,6 +110,10 @@ function generateGuests(playState) {
   }
 }
 
+/**
+ * Setting up stuff for the guests group. It may work. It may not.
+ * @param {*} playState 
+ */
 function createGuests(playState) {
   guests = playState.game.add.group()
   guests.physicsBodyType = Phaser.Physics.ARCADE
@@ -97,6 +122,11 @@ function createGuests(playState) {
   generateGuests(playState)
 }
 
+/**
+ * "Excuse me, madam!"
+ * @param {*} sprite1 
+ * @param {*} sprite2 
+ */
 function bumpIntoPeople(sprite1, sprite2) {
   if (sprite1.body.touching.up) {
     sprite1.body.velocity.y = 0
@@ -113,6 +143,9 @@ function bumpIntoPeople(sprite1, sprite2) {
   }
 }
 
+/**
+ * Playing stage. May have whispers and scandal.
+ */
 const playState = {
   preload: function () {
     this.game.load.spritesheet('player', images.lib.player, 44, 104)
@@ -128,6 +161,7 @@ const playState = {
   },
   update: function () {
     playerMovement()
+    // Guests move around every second or so. Mostly.
     if (this.game.time.now - timer > 1000) {
       guestsMovement(playState)
     }
