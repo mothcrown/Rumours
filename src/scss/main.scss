@@ -1,5 +1,7 @@
 body {
+  color: floralwhite;
   box-sizing: border-box;
+  background-color: #2d2d2d;
 }
 
 #rumours {
@@ -8,4 +10,7 @@ body {
   left: 0;
   right: 0;
   width: 700px;
+  @media (max-width: 360px) {
+    width: 360px;
+  }
 }
