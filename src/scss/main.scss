@@ -3,15 +3,18 @@
   src: url(../font/VCR_OSD_MONO_1.001.ttf);
 }
 
-@font-face {
-  font-family: Minecraft;
-  src: url(../font/Minecraft.ttf);
+@mixin border($width: 1px, $style: solid, $color: black) {
+  border: $width $style $color;
+}
+
+@mixin borderradius($radius: .5em) {
+  border-radius: $radius;
 }
 
 body {
   color: floralwhite;
   box-sizing: border-box;
-  background-color: #2d2d2d;
+  background-color: black;
 }
 
 #rumours {
@@ -20,9 +23,6 @@ body {
   left: 0;
   right: 0;
   width: 700px;
-  @media (max-width: 360px) {
-    width: 360px;
-  }
 }
 
 #pauseCurtain {
@@ -30,6 +30,53 @@ body {
   width: 640px;
   height: 480px;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+#pauseMenu {
+  font-family: VCR OSD Mono;
+  position: absolute;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  width: 30%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  @include border(3px, solid, darkgoldenrod);
+  @include borderradius;
+  div {
+    position: relative;
+  }
+  div:first-of-type {
+    padding-top: 1em;
+  }
+  a {
+    padding: .5em;
+    color: floralwhite;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+#auxWindow {
+  font-family: VCR OSD Mono;
+  position: absolute;
+  display: none;
+  left: 31%;
+  width: 60%;
+  height: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding-left: 1em;
+  @include border(3px, solid, darkgoldenrod);
+  @include borderradius;
+}
+
+.selector {
+  font-size: 80%;
+  display:inline-block;
+  width: 2em;
+  vertical-align: top;
 }
 
 #pauseText {

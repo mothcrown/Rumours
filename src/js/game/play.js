@@ -1,6 +1,7 @@
 /* global Phaser */
 /* eslint object-shorthand: ["error", "never"] */
 /* eslint no-param-reassign: [2, { "props": false }] */
+/* eslint no-use-before-define: ["error", { "functions": false }] */
 
 // Imports
 import $ from 'jquery'
@@ -18,7 +19,6 @@ let guests
 let cursors
 let keys
 let timer
-let pauseLabel
 
 // Number of generated guests & rivals
 const guestNumber = 15
@@ -39,13 +39,15 @@ function createPlayer(playState) {
   player.enableBody = true
   player.body.collideWorldBounds = true
 
+  // A bright new beginning!
+  player.scandal = 0
+
   // Random background generation
   player.gender = 'male'
-  const titleRoll = Math.floor(Math.random() * 3)
   const nameRoll = Math.floor((Math.random() * 15) + 1)
   const surnameRoll = Math.floor((Math.random() * 30) + 1)
 
-  player.title = (player.gender === 'female') ? titles[titleRoll].female : titles[titleRoll].male
+  player.title = (player.gender === 'female') ? titles[0].female : titles[0].male
   player.name = (player.gender === 'female') ? femaleNames[nameRoll] : maleNames[nameRoll]
   player.surname = surnames[surnameRoll]
 
@@ -212,19 +214,141 @@ function createKeys(playState) {
   }
 }
 
-function pauseEvent(playState) {
+function readyAuxWindow() {
+  $(document).off()
+  $('#auxWindow').empty()
+  $('#auxWindow').css('display', 'inline-block')
+}
+
+function showCharacterSheet(playState) {
+  readyAuxWindow(playState)
+  const quote = '"A young new face in the court..."'
+  $(`<p>TITLE: ${player.title}</p>`).appendTo('#auxWindow')
+  $(`<p>NAME: ${player.name} ${player.surname}</p><br />`).appendTo('#auxWindow')
+  $(`<p>${quote}</p><br />`).appendTo('#auxWindow')
+  $(`<p>SCANDAL: ${player.scandal}</p>`).appendTo('#auxWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
-      playState.game.paused = (playState.game.paused !== true)
-      
-      if (playState.game.paused) {
-        $('<div id="pauseCurtain"></div>').prependTo('#rumours')
-        $('<h2 id="pauseText">PAUSED</h2>').appendTo('#rumours')
-      } else {
-        $('#pauseCurtain').remove()
-        $('#pauseText').remove()
+      $('#auxWindow').css('display', 'none')
+      menuSelection(playState, 1)
+    }
+  })
+}
+
+function unpauseGame(playState) {
+  $('#pauseCurtain').css('display', 'none')
+  $('#pauseMenu').css('display', 'none')
+  playState.game.paused = false
+  pauseEvent(playState)
+}
+
+function innerSelection(playState, option) {
+  $('#pauseCurtain').css('display', 'none')
+  $('#pauseMenu').css('display', 'none')
+  $('#auxWindow').css('display', 'none')
+  playState.game.paused = false
+  $(document).off()
+  if (option === 'restart') {
+    playState.game.state.restart()
+  } else {
+    window.location = 'https://github.com/mothcrown'
+  }
+}
+
+function confirmDialog(playState, option) {
+  readyAuxWindow(playState)
+  const message = (option === 'restart') ? 'start a new game' : 'quite the game'
+  $(`<br /><br /><p>Are you sure you want to ${message}?</p>`).appendTo('#auxWindow')
+  $('<a href="" id="innerno"><span id="inner0" class="innerSelector"></span><span class="innerOption">No</span></a>').appendTo('#auxWindow')
+  $('<a href="" id="inneryes"><span id="inner1" class="innerSelector"></span><span class="innerOption">Yes</span></a>').appendTo('#auxWindow')
+
+  $('.innerSelector').empty()
+
+  const options = [
+    'inner0', 'inner1'
+  ]
+
+  let counter = 0
+  $(`#${options[counter]}`).text('\u25B6')
+
+  $(document).keydown((event) => {
+    if ((event.which === 37 || event.keyCode === 37) && counter !== 0) {
+      $('.innerSelector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 39 || event.keyCode === 39) && counter !== 1) {
+      $('.innerSelector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          $('#auxWindow').css('display', 'none')
+          menuSelection(playState, ((option === 'restart') ? 2 : 3))
+          break
+        case 1:
+          innerSelection(playState, option)
+          break
+        default:
+          break
       }
-      
+    }
+  })
+}
+
+function menuSelection(playState, option) {
+  $(document).off()
+  $('.selector').empty()
+
+  const options = [
+    'selector0', 'selector1', 'selector2', 'selector3'
+  ]
+
+  let counter = option
+  $(`#${options[counter]}`).text('\u25B6')
+
+  $(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+      $('.selector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) && counter !== 3) {
+      $('.selector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          unpauseGame(playState)
+          break
+        case 1:
+          showCharacterSheet(playState)
+          break
+        case 2:
+          confirmDialog(playState, 'restart')
+          break
+        case 3:
+          confirmDialog(playState, 'quit')
+          break
+        default:
+          break
+      }
+    }
+  })
+}
+
+function pauseEvent(playState) {
+  $(document).off()
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      playState.game.paused = true
+      $('<div id="pauseCurtain"></div>').prependTo('#rumours')
+      $('#pauseMenu').css('display', 'flex')
+      menuSelection(playState, 0)
     }
   })
 }
