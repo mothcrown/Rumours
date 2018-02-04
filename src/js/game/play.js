@@ -13,11 +13,13 @@ import surnames from './names/surnames'
 import './../phaser.min'
 
 // "Consts"
+let game
 let player
 let rivals
 let guests
 let cursors
 let keys
+let waltz
 let timer
 
 // Number of generated guests & rivals
@@ -28,28 +30,41 @@ const playerVelocity = 150
 const guestVelocity = 75
 const rivalVelocity = 125
 
+// Our list of rumours
+const rumourList = [
+  'reads those obscene French literates',
+  'has a liason with the Countess',
+  'has sympathies for the Magyar nationalists',
+  'has a secret son in London. Scandalous!',
+  'has lost his fortune and filed for bankrupcy'
+]
+
 /**
  * Pretty much creates the player. It does that. What else do you need?
  * @param {*} playState
  */
-function createPlayer(playState) {
-  player = playState.game.add.sprite(320, 400, 'player')
+function createPlayer() {
+  player = game.add.sprite(320, 400, 'player')
   player.anchor.set(0.5, 0.5)
-  playState.game.physics.enable(player, Phaser.Physics.ARCADE)
+  game.physics.enable(player, Phaser.Physics.ARCADE)
   player.enableBody = true
   player.body.collideWorldBounds = true
 
-  // A bright new beginning!
-  player.scandal = 0
-
   // Random background generation
   player.gender = 'male'
-  const nameRoll = Math.floor((Math.random() * 15) + 1)
-  const surnameRoll = Math.floor((Math.random() * 30) + 1)
+  const nameRoll = Math.floor(Math.random() * 15)
+  const surnameRoll = Math.floor(Math.random() * 30)
 
   player.title = (player.gender === 'female') ? titles[0].female : titles[0].male
   player.name = (player.gender === 'female') ? femaleNames[nameRoll] : maleNames[nameRoll]
   player.surname = surnames[surnameRoll]
+
+  // A past sin you can't correct...
+  const secretRoll = Math.floor(Math.random() * 5)
+  player.secret = rumourList[secretRoll]
+
+  // ... and a bright new beginning
+  player.scandal = 0
 
   player.animations.add('walksouth', [0], 30, true)
   player.animations.add('walknorth', [1], 30, true)
@@ -58,12 +73,251 @@ function createPlayer(playState) {
 }
 
 /**
+ * More civil discourse, of course.
+ * @param {*} npc 
+ * @param {*} success 
+ */
+function gossipExchange(npc, success) {
+  $(document).off()
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'block')
+  $('#dialogWindow').css('height', '30%')
+  let message
+  if (success) {
+    message = 'Oh my! What a delicious piece of gossip...!'
+  } else {
+    message = `That sounds quite interesting, but haven't you heard perchance that the ${npc.rumour.target.title} ${npc.rumour.target.surname} ${rumourList[npc.rumour.scandal - 1]}?`
+  }
+
+  $(`<p>"${message}"</p>`).appendTo('#dialogWindow')
+  $('<a href="" id="leave"><span id="rumourDialog0" class="throwSelector"></span><span class="rumourOption">Leave</span></a>').appendTo('#dialogWindow')
+  $('#rumourDialog0').text('\u25B6')
+  
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      unpauseGame()
+    }
+  })
+}
+
+/**
+ * "Let me tell you a little secret..."
+ */
+function expandRumour(protagonist, npc, enemy) {
+  $('#dialogWindow').css('display', 'block')
+  // input[type="radio"][name="rumour"]:checked
+  // WHY U NO WORK >:(
+  //
+  // Nevermind I'm a retard
+  const options = $('input[name="rumour"]')
+
+  let scandalPoints
+  Object.values(options).map((radio) => {
+    if (radio.checked) {
+      scandalPoints = radio.value
+    }
+  })
+
+  const rumour = {
+    origin: protagonist,
+    target: enemy,
+    scandal: +scandalPoints
+  }
+
+  if (npc.rumour !== undefined) {
+    if (npc.rumour.scandal > rumour.scandal) {
+      gossipExchange(npc, false)
+    } else {
+      npc.rumour = rumour
+      gossipExchange(npc, true)
+    }
+  } else {
+    npc.rumour = rumour
+    gossipExchange(npc, true)
+  }
+}
+
+/**
+ * As if you needed to find more!
+ * @param {*} fullName 
+ */
+function findRival(fullName) {
+  let enemy
+  rivals.forEach((rival) => {
+    const nFullName = `${rival.name} ${rival.surname}`
+    if (fullName === nFullName) {
+      enemy = rival
+    }
+  })
+  return enemy
+}
+
+/**
+ * Simple and fun
+ * @param {*} rival 
+ */
+function showRumourChoices(rival) {
+  $('#rumourChoices').empty()
+  const numChoices = rumourList.length
+  for (let i = 0; i < numChoices; i += 1) {
+    const scandal = i + 1
+    $(`<input type="radio" id="rumour${scandal}" name="rumour" value="${scandal}"><label for="rumour${scandal}">The ${rival.title} ${rival.surname} ${rumourList[i]}</label><br />`).appendTo('#rumourChoices')
+  }
+}
+
+/**
+ * This needs refactoring. Like, right now.
+ * NOPE FORGET IT KEEP GOING
+ *
+ * @param {*} protagonist
+ * @param {*} npc
+ */
+function rumourMenu(protagonist, npc) {
+  $(document).off()
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'block')
+  $('#dialogWindow').css('height', '50%')
+  $('<select id="rivalsList"></select>').appendTo('#dialogWindow')
+
+  let enemy
+  $('#rivalsList').change(() => {
+    enemy = findRival($('#rivalsList').val())
+    showRumourChoices(enemy)
+  })
+  rivals.forEach((rival) => {
+    $(`<option value="${rival.name} ${rival.surname}">${rival.title} ${rival.surname}</option>`).appendTo('#rivalsList')
+  })
+  $('<div id="rumourChoices"></div>').appendTo('#dialogWindow')
+
+  // This smells
+  enemy = findRival($('#rivalsList').val())
+  showRumourChoices(enemy)
+
+  $('<div id="rumourMenuChoices"></div>').appendTo('#dialogWindow')
+  $('<a href="" id="leave"><span id="rumourDialog0" class="throwSelector"></span><span class="rumourOption">Leave</span></a>').appendTo('#rumourMenuChoices')
+  $('<a href="" id="throw"><span id="rumourDialog1" class="throwSelector"></span><span class="rumourOption">Throw</span></a>').appendTo('#rumourMenuChoices')
+
+  $('.throwSelector').empty()
+
+  const options = [
+    'rumourDialog0', 'rumourDialog1'
+  ]
+
+  const rumours = [
+    'rumour1', 'rumour2', 'rumour3', 'rumour4', 'rumour5'
+  ]
+
+  // Two sets of movements, two counters. Makes sense!
+  let counter = 0
+  let rumourCounter = 0
+  $(`#${rumours[rumourCounter]}`).prop('checked', true)
+  $(`#${options[counter]}`).text('\u25B6')
+  /**
+   * We can select radio using up and down and then move our selector with left right.
+   * Spacebar selects option.
+   */
+  $(document).keydown((event) => {
+    if ((event.which === 37 || event.keyCode === 37) && counter !== 0) {
+      $('.throwSelector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 39 || event.keyCode === 39) && counter !== 1) {
+      $('.throwSelector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 38 || event.keyCode === 38) && rumourCounter !== 0) {
+      $('input[type="radio"]').prop('checked', false)
+      rumourCounter -= 1
+      $(`#${rumours[rumourCounter]}`).prop('checked', true)
+    }
+    if ((event.which === 40 || event.keyCode === 40) && rumourCounter !== 4) {
+      $('input[type="radio"]').prop('checked', false)
+      rumourCounter += 1
+      $(`#${rumours[rumourCounter]}`).prop('checked', true)
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      event.preventDefault()
+      switch (counter) {
+        case 0:
+          unpauseGame()
+          break
+        case 1:
+          expandRumour(protagonist, npc, enemy)
+          break
+        default:
+          break
+      }
+    }
+  })
+}
+
+/**
+ * Civil discourse
+ */
+function guestInteract() {
+  $('#dialogWindow').empty()
+  $('<div id="pauseCurtain"></div>').prependTo('#rumours')
+  $('#dialogWindow').css('display', 'block')
+  const title = (player.gender === 'female') ? 'lady' : 'sir'
+  $(`<p>"Hmmm. Delighted to make your acquaintance, young ${title}."</p>`).appendTo('#dialogWindow')
+  $('<a href="" id="rumour"><span id="rumourMenu0" class="rumourSelector"></span><span class="rumourOption">Throw Rumour</span></a>').appendTo('#dialogWindow')
+  $('<a href="" id="leave"><span id="rumourMenu1" class="rumourSelector"></span><span class="rumourOption">Excuse yourself</span></a>').appendTo('#dialogWindow')
+}
+
+/**
+ * AKA Throw shit around
+ * @param {*} protagonist 
+ * @param {*} npc 
+ */
+function throwRumour(protagonist, npc) {
+  game.paused = true
+  $(document).off()
+  guestInteract()
+
+  $('.rumourSelector').empty()
+
+  const options = [
+    'rumourMenu0', 'rumourMenu1'
+  ]
+
+  let counter = 0
+  $(`#${options[counter]}`).text('\u25B6')
+
+  $(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+      $('.rumourSelector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) && counter !== 1) {
+      $('.rumourSelector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          rumourMenu(protagonist, npc)
+          break
+        case 1:
+          unpauseGame()
+          break
+        default:
+          break
+      }
+    }
+  })
+}
+
+/**
  * Player movement:
  * I'm sure there is a nicer, far more elegant way to do this. Oh well!
  *
  * ¯\_(ツ)_/¯
  */
-function playerAction(playState) {
+function playerAction() {
   player.body.velocity.x = 0
   player.body.velocity.y = 0
   player.sendToBack()
@@ -82,6 +336,7 @@ function playerAction(playState) {
   }
 }
 
+/** This is stupidly cute */
 const getVelocity = id => ({
   guest: guestVelocity,
   rival: rivalVelocity
@@ -92,7 +347,7 @@ const getVelocity = id => ({
  * than you and they know it.
  * @param {*} game
  */
-function npcMovement(game, group) {
+function npcMovement(group) {
   group.forEach((npc) => {
     const npc1 = npc
     npc1.body.velocity.y = 0
@@ -123,6 +378,7 @@ function npcMovement(game, group) {
         break
     }
   })
+  // This way we check if it's time for our npcs to move again or not
   timer = game.time.now
 }
 
@@ -130,9 +386,9 @@ function npcMovement(game, group) {
  * What kind of party has no guests? Certainly not one I'd bother to go, I say!
  * @param {*} playState
  */
-function generateGuests(playState) {
+function generateGuests() {
   for (let i = 0; i < guestNumber; i += 1) {
-    const guest = guests.create(playState.game.world.randomX, playState.game.world.randomY, 'guestmale1')
+    const guest = guests.create(game.world.randomX, game.world.randomY, 'guestmale1')
     guest.anchor.set(0.5, 0.5)
     guest.body.collideWorldBounds = true
     guest.allowGravity = false
@@ -147,29 +403,37 @@ function generateGuests(playState) {
  * Setting up stuff for the guests group. It may work. It may not.
  * @param {*} playState
  */
-function createGuests(playState) {
-  guests = playState.game.add.group()
+function createGuests() {
+  guests = game.add.group()
   guests.physicsBodyType = Phaser.Physics.ARCADE
   guests.enableBody = true
   guests.setAll('body.mass', 'body', 1)
-  generateGuests(playState)
+  generateGuests()
 }
 
-function generateRivals(playState) {
+/**
+ * Let's create a villain!
+ */
+function generateRivals() {
   for (let i = 0; i < rivalNumber; i += 1) {
-    const rival = rivals.create(playState.game.world.randomX, playState.game.world.randomY, 'rivalmale1')
+    const rival = rivals.create(game.world.randomX, game.world.randomY, 'rivalmale1')
     rival.anchor.set(0.5, 0.5)
     rival.body.collideWorldBounds = true
     rival.allowGravity = false
 
     rival.gender = 'male'
     const titleRoll = Math.floor(Math.random() * 3)
-    const nameRoll = Math.floor((Math.random() * 15) + 1)
-    const surnameRoll = Math.floor((Math.random() * 30) + 1)
+    const nameRoll = Math.floor(Math.random() * 15)
+    const surnameRoll = Math.floor(Math.random() * 30)
 
     rival.title = (rival.gender === 'female') ? titles[titleRoll].female : titles[titleRoll].male
     rival.name = (rival.gender === 'female') ? femaleNames[nameRoll] : maleNames[nameRoll]
     rival.surname = surnames[surnameRoll]
+
+    const secretRoll = Math.floor(Math.random() * 5)
+    rival.secret = rumourList[secretRoll]
+
+    rival.scandal = 0
 
     rival.animations.add('walksouth', [0], 30, true)
     rival.animations.add('walknorth', [1], 30, true)
@@ -178,12 +442,56 @@ function generateRivals(playState) {
   }
 }
 
-function createRivals(playState) {
-  rivals = playState.game.add.group()
+/**
+ * Creates rival group
+ */
+function createRivals() {
+  rivals = game.add.group()
   rivals.physicsBodyType = Phaser.Physics.ARCADE
   rivals.enableBody = true
   rivals.setAll('body.mass', 'body', 1)
-  generateRivals(playState)
+  generateRivals()
+}
+
+/**
+ * "All you hear are whispers."
+ * 
+ * @param {*} guest1 
+ * @param {*} guest2 
+ */
+function shareRumours(guest1, guest2) {
+  if (guest2.rumour !== undefined) {
+    if (guest1.rumour.scandal > guest2.rumour.scandal) {
+      guest2.rumour = guest1.rumour
+    } else if (guest1.rumour.scandal < guest2.rumour.scandal) {
+      guest1.rumour = guest2.rumour
+    }
+  } else {
+    guest2.rumour = guest1.rumour
+  }
+}
+
+/**
+ * It needs some IA. I needs some time.
+ * 
+ * @param {*} enemy 
+ * @param {*} npc 
+ */
+function rivalThrowsRumour(enemy, npc) {
+  const rumourRoll = Math.floor(Math.random() * 5)
+  const rumour = {
+    origin: enemy,
+    target: player,
+    scandal: rumourRoll
+  }
+
+  if (npc.rumour !== undefined) {
+    if (npc.rumour.scandal < rumour.scandal) {
+      npc.rumour = rumour
+    } else {
+      npc.rumour = rumour
+    }
+  }
 }
 
 /**
@@ -205,6 +513,19 @@ function bumpIntoPeople(sprite1, sprite2) {
     sprite1.body.velocity.x = 0
     sprite2.body.velocity.x = 0
   }
+
+  // A whole day to figure this out. F*** everything.
+  if (sprite1.key === 'player' && sprite2.key.substring(0, 5) === 'guest' && keys.interact.isDown) {
+    throwRumour(sprite1, sprite2)
+  }
+
+  if (sprite1.key.substring(0, 5) === 'guest' && sprite2.key.substring(0, 5) === 'guest' && sprite1.rumour !== undefined) {
+    shareRumours(sprite1, sprite2)
+  }
+
+  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest') {
+    rivalThrowsRumour(sprite1, sprite2)
+  }
 }
 
 function createKeys(playState) {
@@ -214,49 +535,69 @@ function createKeys(playState) {
   }
 }
 
+/**
+ * Gets auxWindow ready
+ */
 function readyAuxWindow() {
   $(document).off()
   $('#auxWindow').empty()
   $('#auxWindow').css('display', 'inline-block')
 }
 
-function showCharacterSheet(playState) {
-  readyAuxWindow(playState)
+/**
+ * Character sheet!
+ */
+function showCharacterSheet() {
+  readyAuxWindow()
   const quote = '"A young new face in the court..."'
+  const article = (player.gender === 'female') ? 'She' : 'He'
   $(`<p>TITLE: ${player.title}</p>`).appendTo('#auxWindow')
-  $(`<p>NAME: ${player.name} ${player.surname}</p><br />`).appendTo('#auxWindow')
+  $(`<p>NAME: ${player.name} ${player.surname}</p>`).appendTo('#auxWindow')
   $(`<p>${quote}</p><br />`).appendTo('#auxWindow')
+  $(`<p>SECRET: ${article} ${player.secret}</p>`).appendTo('#auxWindow')
   $(`<p>SCANDAL: ${player.scandal}</p>`).appendTo('#auxWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       $('#auxWindow').css('display', 'none')
-      menuSelection(playState, 1)
+      menuSelection(1)
     }
   })
 }
 
-function unpauseGame(playState) {
+/**
+ * It unpauses the game.
+ */
+function unpauseGame() {
   $('#pauseCurtain').css('display', 'none')
   $('#pauseMenu').css('display', 'none')
-  playState.game.paused = false
-  pauseEvent(playState)
+  $('#dialogWindow').css('display', 'none')
+  game.paused = false
+  pauseEvent()
 }
 
-function innerSelection(playState, option) {
+/**
+ * I'm sure there has to be a way to refactor all this madness! Meanwhile...
+ * @param {*} option 
+ */
+function innerSelection(option) {
   $('#pauseCurtain').css('display', 'none')
   $('#pauseMenu').css('display', 'none')
   $('#auxWindow').css('display', 'none')
-  playState.game.paused = false
+  game.paused = false
   $(document).off()
   if (option === 'restart') {
-    playState.game.state.restart()
+    game.state.restart()
   } else {
     window.location = 'https://github.com/mothcrown'
   }
 }
 
-function confirmDialog(playState, option) {
-  readyAuxWindow(playState)
+/**
+ * Bit more complex than I'd like. Checks whether you want to leave the game or not.
+ * @param {*} option 
+ */
+function confirmWindow(option) {
+  readyAuxWindow()
   const message = (option === 'restart') ? 'start a new game' : 'quite the game'
   $(`<br /><br /><p>Are you sure you want to ${message}?</p>`).appendTo('#auxWindow')
   $('<a href="" id="innerno"><span id="inner0" class="innerSelector"></span><span class="innerOption">No</span></a>').appendTo('#auxWindow')
@@ -286,10 +627,10 @@ function confirmDialog(playState, option) {
       switch (counter) {
         case 0:
           $('#auxWindow').css('display', 'none')
-          menuSelection(playState, ((option === 'restart') ? 2 : 3))
+          menuSelection(((option === 'restart') ? 2 : 3))
           break
         case 1:
-          innerSelection(playState, option)
+          innerSelection(option)
           break
         default:
           break
@@ -298,7 +639,11 @@ function confirmDialog(playState, option) {
   })
 }
 
-function menuSelection(playState, option) {
+/**
+ * Took me quite a bit. Not bad. Not bad!
+ * @param {*} option 
+ */
+function menuSelection(option) {
   $(document).off()
   $('.selector').empty()
 
@@ -323,16 +668,16 @@ function menuSelection(playState, option) {
     if (event.which === 32 || event.keyCode === 32) {
       switch (counter) {
         case 0:
-          unpauseGame(playState)
+          unpauseGame()
           break
         case 1:
-          showCharacterSheet(playState)
+          showCharacterSheet()
           break
         case 2:
-          confirmDialog(playState, 'restart')
+          confirmWindow('restart')
           break
         case 3:
-          confirmDialog(playState, 'quit')
+          confirmWindow('quit')
           break
         default:
           break
@@ -341,14 +686,36 @@ function menuSelection(playState, option) {
   })
 }
 
-function pauseEvent(playState) {
+/**
+ * It pauses the game. It's a pretty chill function.
+ */
+function pauseEvent() {
   $(document).off()
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
-      playState.game.paused = true
+      game.paused = true
       $('<div id="pauseCurtain"></div>').prependTo('#rumours')
       $('#pauseMenu').css('display', 'flex')
-      menuSelection(playState, 0)
+      menuSelection(0)
+    }
+  })
+}
+
+/**
+ * Need more time, need more time!
+ * To be shown: most popular rumour, check if true else lose the game
+ */
+function gameOver() {
+  game.paused = true
+  $(document).off()
+  $('#statusWindow').css('display', 'block')
+  $('<p>Ending yet to be implemented... sigh</p>').appendTo('#statusWindow')
+  $('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      game.paused = false
+      $('#statusWindow').css('display', 'none')
+      game.state.restart()
     }
   })
 }
@@ -358,33 +725,38 @@ function pauseEvent(playState) {
  */
 const playState = {
   preload: function () {
-    this.game.load.spritesheet('player', images.lib.player, 44, 104)
-    this.game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
-    this.game.load.spritesheet('rivalmale1', images.lib.rivalmale1, 44, 104)
+    game = this.game
+    game.load.spritesheet('player', images.lib.player, 44, 104)
+    game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
+    game.load.spritesheet('rivalmale1', images.lib.rivalmale1, 44, 104)
   },
   create: function () {
-    this.game.physics.startSystem(Phaser.Physics.ARCADE)
-    createGuests(playState)
-    createRivals(playState)
-    createPlayer(playState)
-    cursors = this.game.input.keyboard.createCursorKeys()
+    game.physics.startSystem(Phaser.Physics.ARCADE)
+    createGuests()
+    createRivals()
+    createPlayer()
+    cursors = game.input.keyboard.createCursorKeys()
     createKeys(playState)
-    this.game.stage.backgroundColor = '#400000'
-    pauseEvent(playState)
-    timer = this.game.time.now
+    game.stage.backgroundColor = '#400000'
+    pauseEvent()
+    timer = game.time.now
+    waltz = game.time.now
   },
   update: function () {
-    playerAction(playState)
+    playerAction()
     // NPCs move around every second or so. Mostly.
-    if (this.game.time.now - timer > 1000) {
-      npcMovement(playState, rivals)
-      npcMovement(playState, guests)
+    if (game.time.now - timer > 1000) {
+      npcMovement(rivals)
+      npcMovement(guests)
     }
-    this.game.physics.arcade.collide(player, guests, bumpIntoPeople, null, this)
-    this.game.physics.arcade.collide(player, rivals, bumpIntoPeople, null, this)
-    this.game.physics.arcade.collide(guests, guests, bumpIntoPeople, null, this)
-    this.game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
-    this.game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
+    game.physics.arcade.collide(player, guests, bumpIntoPeople, null, this)
+    game.physics.arcade.collide(player, rivals, bumpIntoPeople, null, this)
+    game.physics.arcade.collide(guests, guests, bumpIntoPeople, null, this)
+    game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
+    game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
+    if (game.time.now - waltz > 6000) {
+      gameOver()
+    }
   }
 }
 

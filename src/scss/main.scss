@@ -15,6 +15,11 @@ body {
   color: floralwhite;
   box-sizing: border-box;
   background-color: black;
+  font-family: VCR OSD Mono;
+}
+
+h2 {
+  font-weight: normal;
 }
 
 #rumours {
@@ -70,13 +75,36 @@ body {
   padding-left: 1em;
   @include border(3px, solid, darkgoldenrod);
   @include borderradius;
+  a {
+    padding: .5em;
+    color: floralwhite;
+    text-decoration: none;
+    display: inline-block;
+    width: 40%;
+  }
 }
 
-.selector {
+%selector {
   font-size: 80%;
   display:inline-block;
   width: 2em;
   vertical-align: top;
+}
+
+.selector {
+  @extend %selector;
+}
+
+.innerSelector {
+  @extend %selector;
+}
+
+.rumourSelector {
+  @extend %selector;
+}
+
+.throwSelector {
+  @extend %selector;
 }
 
 #pauseText {
@@ -87,4 +115,58 @@ body {
   z-index: 2;
   top: 40%;
   left: 37%;
+}
+
+#dialogWindow {
+  font-family: VCR OSD Mono;
+  display: none;
+  position: absolute;
+  width: 88%;
+  height: 30%;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding-left: 1em;
+  @include border(3px, solid, darkgoldenrod);
+  @include borderradius;
+  a {
+    display: block;
+    padding: .5em;
+    color: floralwhite;
+    text-decoration: none;
+  }
+  select {
+    cursor: pointer;
+    font-family: "Bookman Old Style";
+    margin-top: 1em;
+  }
+}
+
+#rumourMenuChoices {
+  position: relative;
+  bottom: 0;
+  padding-left: 50%;
+  a {
+    display: inline-block;
+    padding: .5em;
+    color: floralwhite;
+    text-decoration: none;
+    width: 30%;
+  }
+}
+
+#statusWindow {
+  font-family: VCR OSD Mono;
+  display: none;
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  margin-left: 20%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding-left: 1em;
+  @include border(3px, solid, darkgoldenrod);
+  @include borderradius;
+}
+
+#rumourChoices {
+  cursor: pointer;
 }
