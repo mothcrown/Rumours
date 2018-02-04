@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "VCR OSD Mono";
+  src: url(../font/VCR_OSD_MONO_1.001.ttf);
+}
+
+@font-face {
+  font-family: Minecraft;
+  src: url(../font/Minecraft.ttf);
+}
+
 body {
   color: floralwhite;
   box-sizing: border-box;
@@ -13,4 +23,21 @@ body {
   @media (max-width: 360px) {
     width: 360px;
   }
+}
+
+#pauseCurtain {
+  position: absolute;
+  width: 640px;
+  height: 480px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#pauseText {
+  font-family: VCR OSD Mono;
+  font-weight: normal;
+  font-size: 200%;
+  position: absolute;
+  z-index: 2;
+  top: 40%;
+  left: 37%;
 }

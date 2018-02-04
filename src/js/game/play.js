@@ -3,6 +3,7 @@
 /* eslint no-param-reassign: [2, { "props": false }] */
 
 // Imports
+import $ from 'jquery'
 import images from './images'
 import titles from './names/titles'
 import femaleNames from './names/female'
@@ -15,7 +16,9 @@ let player
 let rivals
 let guests
 let cursors
+let keys
 let timer
+let pauseLabel
 
 // Number of generated guests & rivals
 const guestNumber = 15
@@ -58,7 +61,7 @@ function createPlayer(playState) {
  *
  * ¯\_(ツ)_/¯
  */
-function playerMovement() {
+function playerAction(playState) {
   player.body.velocity.x = 0
   player.body.velocity.y = 0
   player.sendToBack()
@@ -122,7 +125,7 @@ function npcMovement(game, group) {
 }
 
 /**
- * What kind of party has no guests? Certainly none I'd bother to go, I say!
+ * What kind of party has no guests? Certainly not one I'd bother to go, I say!
  * @param {*} playState
  */
 function generateGuests(playState) {
@@ -156,6 +159,16 @@ function generateRivals(playState) {
     rival.anchor.set(0.5, 0.5)
     rival.body.collideWorldBounds = true
     rival.allowGravity = false
+
+    rival.gender = 'male'
+    const titleRoll = Math.floor(Math.random() * 3)
+    const nameRoll = Math.floor((Math.random() * 15) + 1)
+    const surnameRoll = Math.floor((Math.random() * 30) + 1)
+
+    rival.title = (rival.gender === 'female') ? titles[titleRoll].female : titles[titleRoll].male
+    rival.name = (rival.gender === 'female') ? femaleNames[nameRoll] : maleNames[nameRoll]
+    rival.surname = surnames[surnameRoll]
+
     rival.animations.add('walksouth', [0], 30, true)
     rival.animations.add('walknorth', [1], 30, true)
     rival.animations.add('walkwest', [2], 30, true)
@@ -192,6 +205,30 @@ function bumpIntoPeople(sprite1, sprite2) {
   }
 }
 
+function createKeys(playState) {
+  keys = {
+    interact: playState.input.keyboard.addKey(Phaser.Keyboard.A),
+    pause: playState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
+  }
+}
+
+function pauseEvent(playState) {
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      playState.game.paused = (playState.game.paused !== true)
+      
+      if (playState.game.paused) {
+        $('<div id="pauseCurtain"></div>').prependTo('#rumours')
+        $('<h2 id="pauseText">PAUSED</h2>').appendTo('#rumours')
+      } else {
+        $('#pauseCurtain').remove()
+        $('#pauseText').remove()
+      }
+      
+    }
+  })
+}
+
 /**
  * Playing stage. May have whispers and scandal.
  */
@@ -207,12 +244,14 @@ const playState = {
     createRivals(playState)
     createPlayer(playState)
     cursors = this.game.input.keyboard.createCursorKeys()
+    createKeys(playState)
     this.game.stage.backgroundColor = '#400000'
+    pauseEvent(playState)
     timer = this.game.time.now
   },
   update: function () {
-    playerMovement()
-    // Guests move around every second or so. Mostly.
+    playerAction(playState)
+    // NPCs move around every second or so. Mostly.
     if (this.game.time.now - timer > 1000) {
       npcMovement(playState, rivals)
       npcMovement(playState, guests)
