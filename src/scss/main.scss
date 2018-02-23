@@ -1,6 +1,6 @@
 @font-face {
   font-family: "VCR OSD Mono";
-  src: url(../font/VCR_OSD_MONO_1.001.ttf);
+  src: url(../fonts/VCR_OSD_MONO_1.001.ttf);
 }
 
 @mixin border($width: 1px, $style: solid, $color: black) {
@@ -9,6 +9,15 @@
 
 @mixin borderradius($radius: .5em) {
   border-radius: $radius;
+}
+
+@mixin textstroke($width: 1px, $color: black) {
+  -webkit-text-stroke: $width $color; 
+  text-stroke: $width $color;
+}
+
+@mixin textshadow($width: 1px, $height: 1px, $blur: 1px, $color: black) {
+  text-shadow: $width $height $blur $color;
 }
 
 body {
@@ -107,6 +116,10 @@ h2 {
   @extend %selector;
 }
 
+.introSelector {
+  @extend %selector;
+}
+
 #pauseText {
   font-family: VCR OSD Mono;
   font-weight: normal;
@@ -169,4 +182,33 @@ h2 {
 
 #rumourChoices {
   cursor: pointer;
+}
+
+.title {
+  position: absolute;
+  font-size: 64px;
+  top: 10%;
+  left: 25%;
+  @include textstroke(1px, darkgoldenrod);
+  @include textshadow;
+}
+
+.subtitle {
+  position: absolute;
+  top: 28%;
+  left: 14%;
+}
+
+.copyright {
+  position: absolute;
+  font-size: 12px;
+  top: 37%;
+  left: 35%;
+}
+
+.introMenu {
+  margin-left: 33%;
+  &:first-of-type {
+    margin-top: 2%;
+  }
 }

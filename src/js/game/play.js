@@ -258,7 +258,7 @@ function rumourMenu(protagonist, npc) {
  */
 function guestInteract() {
   $('#dialogWindow').empty()
-  $('<div id="pauseCurtain"></div>').prependTo('#rumours')
+  $('#pauseCurtain').css('display', 'block')
   $('#dialogWindow').css('display', 'block')
   const title = (player.gender === 'female') ? 'lady' : 'sir'
   $(`<p>"Hmmm. Delighted to make your acquaintance, young ${title}."</p>`).appendTo('#dialogWindow')
@@ -530,7 +530,7 @@ function bumpIntoPeople(sprite1, sprite2) {
 
 function createKeys(playState) {
   keys = {
-    interact: playState.input.keyboard.addKey(Phaser.Keyboard.A),
+    interact: playState.input.keyboard.addKey(Phaser.Keyboard.Z),
     pause: playState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
   }
 }
@@ -694,7 +694,7 @@ function pauseEvent() {
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = true
-      $('<div id="pauseCurtain"></div>').prependTo('#rumours')
+      $('#pauseCurtain').css('display', 'block')
       $('#pauseMenu').css('display', 'flex')
       menuSelection(0)
     }
@@ -708,12 +708,14 @@ function pauseEvent() {
 function gameOver() {
   game.paused = true
   $(document).off()
+  $('#statusWindow').empty()
   $('#statusWindow').css('display', 'block')
   $('<p>Ending yet to be implemented... sigh</p>').appendTo('#statusWindow')
   $('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = false
+      $('#statusWindow').empty()
       $('#statusWindow').css('display', 'none')
       game.state.restart()
     }
@@ -729,6 +731,8 @@ const playState = {
     game.load.spritesheet('player', images.lib.player, 44, 104)
     game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
     game.load.spritesheet('rivalmale1', images.lib.rivalmale1, 44, 104)
+
+    $('#pauseCurtain').css('display', 'none')
   },
   create: function () {
     game.physics.startSystem(Phaser.Physics.ARCADE)
