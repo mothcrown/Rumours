@@ -85,6 +85,7 @@ function gossipExchange(npc, success) {
   let message
   if (success) {
     message = 'Oh my! What a delicious piece of gossip...!'
+    player.scandal += 1
   } else {
     message = `That sounds quite interesting, but haven't you heard perchance that the ${npc.rumour.target.title} ${npc.rumour.target.surname} ${rumourList[npc.rumour.scandal - 1]}?`
   }
@@ -512,9 +513,10 @@ function rivalThrowsRumour(enemy, npc) {
   if (npc.rumour !== undefined) {
     if (npc.rumour.scandal < rumour.scandal) {
       npc.rumour = rumour
-    } else {
-      npc.rumour = rumour
-    }
+      enemy.scandal += 1
+  } else {
+    npc.rumour = rumour
+    enemy.scandal += 1
   }
 }
 
@@ -547,7 +549,7 @@ function bumpIntoPeople(sprite1, sprite2) {
     shareRumours(sprite1, sprite2)
   }
 
-  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest') {
+  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest' && sprite1.scandal < 9) {
     rivalThrowsRumour(sprite1, sprite2)
   }
 }
@@ -729,11 +731,13 @@ function pauseEvent() {
  * Need more time, need more time!
  * To be shown: most popular rumour, check if true else lose the game
  */
-function gameOver() {
+function waltzOver() {
   game.paused = true
   $(document).off()
   $('#statusWindow').empty()
   $('#statusWindow').css('display', 'block')
+
+
   $('<p>Ending yet to be implemented... sigh</p>').appendTo('#statusWindow')
   $('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
   $(document).keydown((event) => {
@@ -785,7 +789,7 @@ const playState = {
     game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
     if (game.time.now - waltz > 60000) {
-      gameOver()
+      waltzOver()
     }
   }
 }
