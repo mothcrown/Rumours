@@ -24,7 +24,7 @@ let timer
 
 // Number of generated guests & rivals
 const guestNumber = 15
-const rivalNumber = 1
+const rivalNumber = (localStorage.difficulty !== undefined) ? localStorage.difficulty : 2
 
 const playerVelocity = 150
 const guestVelocity = 75
@@ -415,8 +415,10 @@ function createGuests() {
  * Let's create a villain!
  */
 function generateRivals() {
+  const rivalStyles = ['rivalmale1', 'rivalmale2', 'rivalmale3']
+
   for (let i = 0; i < rivalNumber; i += 1) {
-    const rival = rivals.create(game.world.randomX, game.world.randomY, 'rivalmale1')
+    const rival = rivals.create(game.world.randomX, game.world.randomY, rivalStyles[i])
     rival.anchor.set(0.5, 0.5)
     rival.body.collideWorldBounds = true
     rival.allowGravity = false
@@ -588,7 +590,7 @@ function innerSelection(option) {
   if (option === 'restart') {
     game.state.restart()
   } else {
-    window.location = 'https://github.com/mothcrown'
+    game.state.start('intro')
   }
 }
 
@@ -598,7 +600,7 @@ function innerSelection(option) {
  */
 function confirmWindow(option) {
   readyAuxWindow()
-  const message = (option === 'restart') ? 'start a new game' : 'quite the game'
+  const message = (option === 'restart') ? 'start a new game' : 'quit the game'
   $(`<br /><br /><p>Are you sure you want to ${message}?</p>`).appendTo('#auxWindow')
   $('<a href="" id="innerno"><span id="inner0" class="innerSelector"></span><span class="innerOption">No</span></a>').appendTo('#auxWindow')
   $('<a href="" id="inneryes"><span id="inner1" class="innerSelector"></span><span class="innerOption">Yes</span></a>').appendTo('#auxWindow')
@@ -717,7 +719,7 @@ function gameOver() {
       game.paused = false
       $('#statusWindow').empty()
       $('#statusWindow').css('display', 'none')
-      game.state.restart()
+      game.state.start('intro')
     }
   })
 }
@@ -731,6 +733,8 @@ const playState = {
     game.load.spritesheet('player', sprites.lib.player, 44, 104)
     game.load.spritesheet('guestmale1', sprites.lib.guestmale1, 44, 104)
     game.load.spritesheet('rivalmale1', sprites.lib.rivalmale1, 44, 104)
+    game.load.spritesheet('rivalmale2', sprites.lib.rivalmale2, 44, 104)
+    game.load.spritesheet('rivalmale3', sprites.lib.rivalmale3, 44, 104)
 
     $('#pauseCurtain').css('display', 'none')
   },

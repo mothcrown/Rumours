@@ -124,6 +124,14 @@ h2 {
   @extend %selector;
 }
 
+.diffSelector {
+  @extend %selector;
+}
+
+.registerSelector {
+  @extend %selector;
+}
+
 #pauseText {
   font-family: VCR OSD Mono;
   font-weight: normal;
@@ -227,4 +235,19 @@ h2 {
   &:first-of-type {
     margin-top: 2%;
   }
+}
+
+.diffMenu {
+  margin-left: 33%;
+  &:first-of-type {
+    margin-top: -2%;
+  }
+}
+
+.registerMenu {
+  margin-left: 75%;
+}
+
+#portrait {
+  margin-left: 1em;
 }
