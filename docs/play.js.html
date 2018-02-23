@@ -1,11 +1,39 @@
-/* global Phaser */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: play.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: play.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* global Phaser */
 /* eslint object-shorthand: ["error", "never"] */
 /* eslint no-param-reassign: [2, { "props": false }] */
 /* eslint no-use-before-define: ["error", { "functions": false }] */
 
 // Imports
 import $ from 'jquery'
-import sprites from './images/sprites'
+import images from './images'
 import titles from './names/titles'
 import femaleNames from './names/female'
 import maleNames from './names/male'
@@ -20,15 +48,11 @@ let guests
 let cursors
 let keys
 let waltz
-let waltzEvent
 let timer
-let scandalString
-let scandalScore
-let scandalText
 
-// Number of generated guests & rivals
+// Number of generated guests &amp; rivals
 const guestNumber = 15
-const rivalNumber = (localStorage.difficulty !== undefined) ? +localStorage.difficulty : 2
+const rivalNumber = 1
 
 const playerVelocity = 150
 const guestVelocity = 75
@@ -39,7 +63,7 @@ const rumourList = [
   'reads those obscene French literates',
   'has a liason with the Countess',
   'has sympathies for the Magyar nationalists',
-  'has a secret son in London',
+  'has a secret son in London. Scandalous!',
   'has lost his fortune and filed for bankrupcy'
 ]
 
@@ -89,18 +113,12 @@ function gossipExchange(npc, success) {
   let message
   if (success) {
     message = 'Oh my! What a delicious piece of gossip...!'
-    player.scandal += 1
-    scandalText.text = scandalString + player.scandal
   } else {
     message = `That sounds quite interesting, but haven't you heard perchance that the ${npc.rumour.target.title} ${npc.rumour.target.surname} ${rumourList[npc.rumour.scandal - 1]}?`
-    // This is a really fun touch. Love it. I should be doing more core stuff, tho
-    if (npc.rumour.scandal > 3) {
-      message += ' Scandalous!'
-    }
   }
 
-  $(`<p>"${message}"</p>`).appendTo('#dialogWindow')
-  $('<a href="" id="leave"><span id="rumourDialog0" class="throwSelector"></span><span class="rumourOption">Leave</span></a>').appendTo('#dialogWindow')
+  $(`&lt;p>"${message}"&lt;/p>`).appendTo('#dialogWindow')
+  $('&lt;a href="" id="leave">&lt;span id="rumourDialog0" class="throwSelector">&lt;/span>&lt;span class="rumourOption">Leave&lt;/span>&lt;/a>').appendTo('#dialogWindow')
   $('#rumourDialog0').text('\u25B6')
   
   $(document).keydown((event) => {
@@ -169,9 +187,9 @@ function findRival(fullName) {
 function showRumourChoices(rival) {
   $('#rumourChoices').empty()
   const numChoices = rumourList.length
-  for (let i = 0; i < numChoices; i += 1) {
+  for (let i = 0; i &lt; numChoices; i += 1) {
     const scandal = i + 1
-    $(`<input type="radio" id="rumour${scandal}" name="rumour" value="${scandal}"><label for="rumour${scandal}">The ${rival.title} ${rival.surname} ${rumourList[i]}</label><br />`).appendTo('#rumourChoices')
+    $(`&lt;input type="radio" id="rumour${scandal}" name="rumour" value="${scandal}">&lt;label for="rumour${scandal}">The ${rival.title} ${rival.surname} ${rumourList[i]}&lt;/label>&lt;br />`).appendTo('#rumourChoices')
   }
 }
 
@@ -187,7 +205,7 @@ function rumourMenu(protagonist, npc) {
   $('#dialogWindow').empty()
   $('#dialogWindow').css('display', 'block')
   $('#dialogWindow').css('height', '50%')
-  $('<select id="rivalsList"></select>').appendTo('#dialogWindow')
+  $('&lt;select id="rivalsList">&lt;/select>').appendTo('#dialogWindow')
 
   let enemy
   $('#rivalsList').change(() => {
@@ -195,17 +213,17 @@ function rumourMenu(protagonist, npc) {
     showRumourChoices(enemy)
   })
   rivals.forEach((rival) => {
-    $(`<option value="${rival.name} ${rival.surname}">${rival.title} ${rival.surname}</option>`).appendTo('#rivalsList')
+    $(`&lt;option value="${rival.name} ${rival.surname}">${rival.title} ${rival.surname}&lt;/option>`).appendTo('#rivalsList')
   })
-  $('<div id="rumourChoices"></div>').appendTo('#dialogWindow')
+  $('&lt;div id="rumourChoices">&lt;/div>').appendTo('#dialogWindow')
 
   // This smells
   enemy = findRival($('#rivalsList').val())
   showRumourChoices(enemy)
 
-  $('<div id="rumourMenuChoices"></div>').appendTo('#dialogWindow')
-  $('<a href="" id="leave"><span id="rumourDialog0" class="throwSelector"></span><span class="rumourOption">Leave</span></a>').appendTo('#rumourMenuChoices')
-  $('<a href="" id="throw"><span id="rumourDialog1" class="throwSelector"></span><span class="rumourOption">Throw</span></a>').appendTo('#rumourMenuChoices')
+  $('&lt;div id="rumourMenuChoices">&lt;/div>').appendTo('#dialogWindow')
+  $('&lt;a href="" id="leave">&lt;span id="rumourDialog0" class="throwSelector">&lt;/span>&lt;span class="rumourOption">Leave&lt;/span>&lt;/a>').appendTo('#rumourMenuChoices')
+  $('&lt;a href="" id="throw">&lt;span id="rumourDialog1" class="throwSelector">&lt;/span>&lt;span class="rumourOption">Throw&lt;/span>&lt;/a>').appendTo('#rumourMenuChoices')
 
   $('.throwSelector').empty()
 
@@ -227,22 +245,22 @@ function rumourMenu(protagonist, npc) {
    * Spacebar selects option.
    */
   $(document).keydown((event) => {
-    if ((event.which === 37 || event.keyCode === 37) && counter !== 0) {
+    if ((event.which === 37 || event.keyCode === 37) &amp;&amp; counter !== 0) {
       $('.throwSelector').empty()
       counter -= 1
       $(`#${options[counter]}`).text('\u25B6')
     }
-    if ((event.which === 39 || event.keyCode === 39) && counter !== 1) {
+    if ((event.which === 39 || event.keyCode === 39) &amp;&amp; counter !== 1) {
       $('.throwSelector').empty()
       counter += 1
       $(`#${options[counter]}`).text('\u25B6')
     }
-    if ((event.which === 38 || event.keyCode === 38) && rumourCounter !== 0) {
+    if ((event.which === 38 || event.keyCode === 38) &amp;&amp; rumourCounter !== 0) {
       $('input[type="radio"]').prop('checked', false)
       rumourCounter -= 1
       $(`#${rumours[rumourCounter]}`).prop('checked', true)
     }
-    if ((event.which === 40 || event.keyCode === 40) && rumourCounter !== 4) {
+    if ((event.which === 40 || event.keyCode === 40) &amp;&amp; rumourCounter !== 4) {
       $('input[type="radio"]').prop('checked', false)
       rumourCounter += 1
       $(`#${rumours[rumourCounter]}`).prop('checked', true)
@@ -268,12 +286,12 @@ function rumourMenu(protagonist, npc) {
  */
 function guestInteract() {
   $('#dialogWindow').empty()
-  $('#pauseCurtain').css('display', 'block')
+  $('&lt;div id="pauseCurtain">&lt;/div>').prependTo('#rumours')
   $('#dialogWindow').css('display', 'block')
   const title = (player.gender === 'female') ? 'lady' : 'sir'
-  $(`<p>"Hmmm. Delighted to make your acquaintance, young ${title}."</p>`).appendTo('#dialogWindow')
-  $('<a href="" id="rumour"><span id="rumourMenu0" class="rumourSelector"></span><span class="rumourOption">Throw Rumour</span></a>').appendTo('#dialogWindow')
-  $('<a href="" id="leave"><span id="rumourMenu1" class="rumourSelector"></span><span class="rumourOption">Excuse yourself</span></a>').appendTo('#dialogWindow')
+  $(`&lt;p>"Hmmm. Delighted to make your acquaintance, young ${title}."&lt;/p>`).appendTo('#dialogWindow')
+  $('&lt;a href="" id="rumour">&lt;span id="rumourMenu0" class="rumourSelector">&lt;/span>&lt;span class="rumourOption">Throw Rumour&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  $('&lt;a href="" id="leave">&lt;span id="rumourMenu1" class="rumourSelector">&lt;/span>&lt;span class="rumourOption">Excuse yourself&lt;/span>&lt;/a>').appendTo('#dialogWindow')
 }
 
 /**
@@ -296,12 +314,12 @@ function throwRumour(protagonist, npc) {
   $(`#${options[counter]}`).text('\u25B6')
 
   $(document).keydown((event) => {
-    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+    if ((event.which === 38 || event.keyCode === 38) &amp;&amp; counter !== 0) {
       $('.rumourSelector').empty()
       counter -= 1
       $(`#${options[counter]}`).text('\u25B6')
     }
-    if ((event.which === 40 || event.keyCode === 40) && counter !== 1) {
+    if ((event.which === 40 || event.keyCode === 40) &amp;&amp; counter !== 1) {
       $('.rumourSelector').empty()
       counter += 1
       $(`#${options[counter]}`).text('\u25B6')
@@ -397,7 +415,7 @@ function npcMovement(group) {
  * @param {*} playState
  */
 function generateGuests() {
-  for (let i = 0; i < guestNumber; i += 1) {
+  for (let i = 0; i &lt; guestNumber; i += 1) {
     const guest = guests.create(game.world.randomX, game.world.randomY, 'guestmale1')
     guest.anchor.set(0.5, 0.5)
     guest.body.collideWorldBounds = true
@@ -422,13 +440,11 @@ function createGuests() {
 }
 
 /**
- * Let's create our villains!
+ * Let's create a villain!
  */
 function generateRivals() {
-  const rivalStyles = ['rivalmale1', 'rivalmale2', 'rivalmale3']
-
-  for (let i = 0; i < rivalNumber; i += 1) {
-    const rival = rivals.create(game.world.randomX, game.world.randomY, rivalStyles[i])
+  for (let i = 0; i &lt; rivalNumber; i += 1) {
+    const rival = rivals.create(game.world.randomX, game.world.randomY, 'rivalmale1')
     rival.anchor.set(0.5, 0.5)
     rival.body.collideWorldBounds = true
     rival.allowGravity = false
@@ -475,7 +491,7 @@ function shareRumours(guest1, guest2) {
   if (guest2.rumour !== undefined) {
     if (guest1.rumour.scandal > guest2.rumour.scandal) {
       guest2.rumour = guest1.rumour
-    } else if (guest1.rumour.scandal < guest2.rumour.scandal) {
+    } else if (guest1.rumour.scandal &lt; guest2.rumour.scandal) {
       guest1.rumour = guest2.rumour
     }
   } else {
@@ -490,45 +506,19 @@ function shareRumours(guest1, guest2) {
  * @param {*} npc 
  */
 function rivalThrowsRumour(enemy, npc) {
-  const playas = ['player', 'rivalmale1', 'rivalmale2', 'rivalmale3']
-  const targetList = []
-
-  const totalShit = rivalNumber + 1
-
-  for (let i = 0; i < totalShit; i += 1) {
-    if (enemy.key !== playas[i]) {
-      targetList.push(playas[i])
-    }
-  }
-
-  const targetsLength = targetList.length
-  const targets = [player]
-
-  for (let i = 0; i < targetsLength; i += 1) {
-    rivals.forEach((rival) => {
-      if (rival.key === targetList[i]) {
-        targets.push(rival)
-      }
-    })
-  }
-
-  // Everybody gets shit here!
-  const targetRoll = Math.floor(Math.random() * targetsLength)
   const rumourRoll = Math.floor(Math.random() * 5)
   const rumour = {
     origin: enemy,
-    target: targets[targetRoll],
+    target: player,
     scandal: rumourRoll
   }
 
   if (npc.rumour !== undefined) {
-    if (npc.rumour.scandal < rumour.scandal) {
+    if (npc.rumour.scandal &lt; rumour.scandal) {
       npc.rumour = rumour
-      enemy.scandal += 1
+    } else {
+      npc.rumour = rumour
     }
-  } else {
-    npc.rumour = rumour
-    enemy.scandal += 1
   }
 }
 
@@ -553,22 +543,22 @@ function bumpIntoPeople(sprite1, sprite2) {
   }
 
   // A whole day to figure this out. F*** everything.
-  if (sprite1.key === 'player' && sprite2.key.substring(0, 5) === 'guest' && keys.interact.isDown) {
+  if (sprite1.key === 'player' &amp;&amp; sprite2.key.substring(0, 5) === 'guest' &amp;&amp; keys.interact.isDown) {
     throwRumour(sprite1, sprite2)
   }
 
-  if (sprite1.key.substring(0, 5) === 'guest' && sprite2.key.substring(0, 5) === 'guest' && sprite1.rumour !== undefined) {
+  if (sprite1.key.substring(0, 5) === 'guest' &amp;&amp; sprite2.key.substring(0, 5) === 'guest' &amp;&amp; sprite1.rumour !== undefined) {
     shareRumours(sprite1, sprite2)
   }
 
-  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest' && sprite1.scandal < 9) {
+  if (sprite1.key.substring(0, 5) === 'rival' &amp;&amp; sprite2.key.substring(0, 5) === 'guest') {
     rivalThrowsRumour(sprite1, sprite2)
   }
 }
 
 function createKeys(playState) {
   keys = {
-    interact: playState.input.keyboard.addKey(Phaser.Keyboard.Z),
+    interact: playState.input.keyboard.addKey(Phaser.Keyboard.A),
     pause: playState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
   }
 }
@@ -589,11 +579,11 @@ function showCharacterSheet() {
   readyAuxWindow()
   const quote = '"A young new face in the court..."'
   const article = (player.gender === 'female') ? 'She' : 'He'
-  $(`<p>TITLE: ${player.title}</p>`).appendTo('#auxWindow')
-  $(`<p>NAME: ${player.name} ${player.surname}</p>`).appendTo('#auxWindow')
-  $(`<p>${quote}</p><br />`).appendTo('#auxWindow')
-  $(`<p>SECRET: ${article} ${player.secret}</p>`).appendTo('#auxWindow')
-  $(`<p>SCANDAL: ${player.scandal}</p>`).appendTo('#auxWindow')
+  $(`&lt;p>TITLE: ${player.title}&lt;/p>`).appendTo('#auxWindow')
+  $(`&lt;p>NAME: ${player.name} ${player.surname}&lt;/p>`).appendTo('#auxWindow')
+  $(`&lt;p>${quote}&lt;/p>&lt;br />`).appendTo('#auxWindow')
+  $(`&lt;p>SECRET: ${article} ${player.secret}&lt;/p>`).appendTo('#auxWindow')
+  $(`&lt;p>SCANDAL: ${player.scandal}&lt;/p>`).appendTo('#auxWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       $('#auxWindow').css('display', 'none')
@@ -610,7 +600,6 @@ function unpauseGame() {
   $('#pauseMenu').css('display', 'none')
   $('#dialogWindow').css('display', 'none')
   game.paused = false
-  waltz.resume()
   pauseEvent()
 }
 
@@ -627,7 +616,7 @@ function innerSelection(option) {
   if (option === 'restart') {
     game.state.restart()
   } else {
-    game.state.start('intro')
+    window.location = 'https://github.com/mothcrown'
   }
 }
 
@@ -637,10 +626,10 @@ function innerSelection(option) {
  */
 function confirmWindow(option) {
   readyAuxWindow()
-  const message = (option === 'restart') ? 'start a new game' : 'quit the game'
-  $(`<br /><br /><p>Are you sure you want to ${message}?</p>`).appendTo('#auxWindow')
-  $('<a href="" id="innerno"><span id="inner0" class="innerSelector"></span><span class="innerOption">No</span></a>').appendTo('#auxWindow')
-  $('<a href="" id="inneryes"><span id="inner1" class="innerSelector"></span><span class="innerOption">Yes</span></a>').appendTo('#auxWindow')
+  const message = (option === 'restart') ? 'start a new game' : 'quite the game'
+  $(`&lt;br />&lt;br />&lt;p>Are you sure you want to ${message}?&lt;/p>`).appendTo('#auxWindow')
+  $('&lt;a href="" id="innerno">&lt;span id="inner0" class="innerSelector">&lt;/span>&lt;span class="innerOption">No&lt;/span>&lt;/a>').appendTo('#auxWindow')
+  $('&lt;a href="" id="inneryes">&lt;span id="inner1" class="innerSelector">&lt;/span>&lt;span class="innerOption">Yes&lt;/span>&lt;/a>').appendTo('#auxWindow')
 
   $('.innerSelector').empty()
 
@@ -652,12 +641,12 @@ function confirmWindow(option) {
   $(`#${options[counter]}`).text('\u25B6')
 
   $(document).keydown((event) => {
-    if ((event.which === 37 || event.keyCode === 37) && counter !== 0) {
+    if ((event.which === 37 || event.keyCode === 37) &amp;&amp; counter !== 0) {
       $('.innerSelector').empty()
       counter -= 1
       $(`#${options[counter]}`).text('\u25B6')
     }
-    if ((event.which === 39 || event.keyCode === 39) && counter !== 1) {
+    if ((event.which === 39 || event.keyCode === 39) &amp;&amp; counter !== 1) {
       $('.innerSelector').empty()
       counter += 1
       $(`#${options[counter]}`).text('\u25B6')
@@ -694,12 +683,12 @@ function menuSelection(option) {
   $(`#${options[counter]}`).text('\u25B6')
 
   $(document).keydown((event) => {
-    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+    if ((event.which === 38 || event.keyCode === 38) &amp;&amp; counter !== 0) {
       $('.selector').empty()
       counter -= 1
       $(`#${options[counter]}`).text('\u25B6')
     }
-    if ((event.which === 40 || event.keyCode === 40) && counter !== 3) {
+    if ((event.which === 40 || event.keyCode === 40) &amp;&amp; counter !== 3) {
       $('.selector').empty()
       counter += 1
       $(`#${options[counter]}`).text('\u25B6')
@@ -733,9 +722,8 @@ function pauseEvent() {
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = true
-      $('#pauseCurtain').css('display', 'block')
+      $('&lt;div id="pauseCurtain">&lt;/div>').prependTo('#rumours')
       $('#pauseMenu').css('display', 'flex')
-      waltz.pause()
       menuSelection(0)
     }
   })
@@ -745,71 +733,19 @@ function pauseEvent() {
  * Need more time, need more time!
  * To be shown: most popular rumour, check if true else lose the game
  */
-function waltzOver() {
+function gameOver() {
   game.paused = true
-  waltz.stop()
   $(document).off()
-  $('#statusWindow').empty()
   $('#statusWindow').css('display', 'block')
-
-
-  $('<p>Most delicious rumours of the dance</p>').appendTo('#statusWindow')
-
-  const allRumours = []
-
-  guests.forEach((guest) => {
-    if (guest.rumour !== undefined) {
-      allRumours.push(guest.rumour)
-    }
-  })
-
-  const totalRumours = allRumours.length
-  const specificRumours = []
-  const rumoursFinal = []
-  
-  // TOO DAMN FUCKING COMPLEX
-  for (let i = 0; i < totalRumours; i += 1) {
-    const rumour = allRumours[i]
-    let rumourCount = 0
-    if (specificRumours.lenght = 0) {
-      specificRumours.push(rumour)
-      rumourCount += 1
-    } else {
-      for (let j = 0; j < specificRumours.lenght; j += 1) {
-        if (rumour === specificRumours[j]) {
-          rumourCount += 1
-        }
-      }
-
-      if (rumourCount === 0) {
-        specificRumours.push(rumour)
-        rumourCount += 1
-      }
-    }
-
-    rumoursFinal.push({ rumour, rumourCount })
-  }
-
-  specificRumours.map((rumour) => {
-    $(`<p>${rumour.target.title} ${rumour.target.surname} ${rumourList[rumour.scandal - 1]}</p>`).appendTo('#statusWindow')
-  })
-
-  $('<p>Thanks for playing this pretty clunky alpha of Rumours!</p>').appendTo('#statusWindow')
-  $('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
+  $('&lt;p>Ending yet to be implemented... sigh&lt;/p>').appendTo('#statusWindow')
+  $('&lt;p>Press spacebar to restart...&lt;/p>').appendTo('#statusWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = false
-      $('#statusWindow').empty()
       $('#statusWindow').css('display', 'none')
-      game.state.start('intro')
+      game.state.restart()
     }
   })
-}
-
-function createUI() {
-  scandalString = 'Scandal: '
-  scandalScore = player.scandal
-  scandalText = game.add.text(450, 440, scandalString + scandalScore, { font: '28px VCR OSD Mono', fill: 'ghostwhite' })
 }
 
 /**
@@ -818,28 +754,21 @@ function createUI() {
 const playState = {
   preload: function () {
     game = this.game
-    game.load.spritesheet('player', sprites.lib.player, 44, 104)
-    game.load.spritesheet('guestmale1', sprites.lib.guestmale1, 44, 104)
-    game.load.spritesheet('rivalmale1', sprites.lib.rivalmale1, 44, 104)
-    game.load.spritesheet('rivalmale2', sprites.lib.rivalmale2, 44, 104)
-    game.load.spritesheet('rivalmale3', sprites.lib.rivalmale3, 44, 104)
-
-    $('#pauseCurtain').css('display', 'none')
+    game.load.spritesheet('player', images.lib.player, 44, 104)
+    game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
+    game.load.spritesheet('rivalmale1', images.lib.rivalmale1, 44, 104)
   },
   create: function () {
     game.physics.startSystem(Phaser.Physics.ARCADE)
     createGuests()
     createRivals()
     createPlayer()
-    createUI()
     cursors = game.input.keyboard.createCursorKeys()
     createKeys(playState)
     game.stage.backgroundColor = '#400000'
     pauseEvent()
     timer = game.time.now
-    waltz = game.time.create()
-    waltzEvent = waltz.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 5, waltzOver, this)
-    waltz.start()
+    waltz = game.time.now
   },
   update: function () {
     playerAction()
@@ -853,7 +782,33 @@ const playState = {
     game.physics.arcade.collide(guests, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
+    if (game.time.now - waltz > 6000) {
+      gameOver()
+    }
   }
 }
 
 export default playState
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#bumpIntoPeople">bumpIntoPeople</a></li><li><a href="global.html#confirmWindow">confirmWindow</a></li><li><a href="global.html#createGuests">createGuests</a></li><li><a href="global.html#createPlayer">createPlayer</a></li><li><a href="global.html#createRivals">createRivals</a></li><li><a href="global.html#expandRumour">expandRumour</a></li><li><a href="global.html#findRival">findRival</a></li><li><a href="global.html#gameOver">gameOver</a></li><li><a href="global.html#generateGuests">generateGuests</a></li><li><a href="global.html#generateRivals">generateRivals</a></li><li><a href="global.html#getVelocity">getVelocity</a></li><li><a href="global.html#gossipExchange">gossipExchange</a></li><li><a href="global.html#guestInteract">guestInteract</a></li><li><a href="global.html#innerSelection">innerSelection</a></li><li><a href="global.html#menuSelection">menuSelection</a></li><li><a href="global.html#npcMovement">npcMovement</a></li><li><a href="global.html#pauseEvent">pauseEvent</a></li><li><a href="global.html#playerAction">playerAction</a></li><li><a href="global.html#playState">playState</a></li><li><a href="global.html#readyAuxWindow">readyAuxWindow</a></li><li><a href="global.html#rivalThrowsRumour">rivalThrowsRumour</a></li><li><a href="global.html#rumourMenu">rumourMenu</a></li><li><a href="global.html#shareRumours">shareRumours</a></li><li><a href="global.html#showCharacterSheet">showCharacterSheet</a></li><li><a href="global.html#showRumourChoices">showRumourChoices</a></li><li><a href="global.html#throwRumour">throwRumour</a></li><li><a href="global.html#unpauseGame">unpauseGame</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Feb 04 2018 23:52:39 GMT+0000 (Hora estándar GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

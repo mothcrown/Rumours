@@ -10445,7 +10445,7 @@ __webpack_require__(4)(__webpack_require__(5))
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(3);
-module.exports = __webpack_require__(15);
+module.exports = __webpack_require__(24);
 
 
 /***/ }),
@@ -10458,8 +10458,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__phaser_min__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__phaser_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__phaser_min__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_play__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_intro__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__game_play__ = __webpack_require__(13);
 /* global Phaser */
+
 
 
 
@@ -10470,8 +10472,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  */
 __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).ready(() => {
   const game = new Phaser.Game(640, 480, Phaser.CANVAS, 'rumours')
-  game.state.add('play', __WEBPACK_IMPORTED_MODULE_2__game_play__["a" /* default */])
-  game.state.start('play')
+  game.state.add('intro', __WEBPACK_IMPORTED_MODULE_2__game_intro__["a" /* default */])
+  game.state.add('play', __WEBPACK_IMPORTED_MODULE_3__game_play__["a" /* default */])
+  game.state.start('intro')
 })
 
 
@@ -10521,11 +10524,308 @@ module.exports = "/* Phaser v2.10.0 - http://phaser.io - @photonstorm - (c) 2016
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__images__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__names_titles__ = __webpack_require__(11);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__names_female__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__names_male__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__names_surnames__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__images_avatars__ = __webpack_require__(7);
+/* global Phaser */
+/* eslint object-shorthand: ["error", "never"] */
+/* eslint no-param-reassign: [2, { "props": false }] */
+/* eslint no-use-before-define: ["error", { "functions": false }] */
+
+// Imports
+
+
+
+let hiscores = __webpack_require__(12)
+
+let game
+
+function startGame() {
+  const player = {}
+  player.name = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#userName').val()
+  player.avatar = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#avatarList').val()
+
+  localStorage.player = JSON.stringify(player)
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').css('display', 'none')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.title').remove()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.subtitle').remove()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.copyright').remove()
+
+  game.state.start('play')
+}
+
+function registerUser() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p style="display: inline-block; margin-right: 1em">Insert your name (3 letter max!):</p>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<input type="text" id="userName" maxlength="3" style="width: 10%" pattern="[A-Z]{3}"><br/>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p style="display: inline-block; margin-top: 0; margin-right: 1em">Select your portrait:</p>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<select id="avatarList"></select>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<option value="0">-- Choose portrait --</option>').appendTo('#avatarList')
+  
+  Object.keys(__WEBPACK_IMPORTED_MODULE_1__images_avatars__["a" /* default */].lib).map((avatar) => {
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<option value="${avatar}">Portrait ${avatar}</option>`).appendTo('#avatarList')
+  })
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#avatarList').change(() => {
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#portrait').remove()
+    const portrait = __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#avatarList').val()
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<img id="portrait" src="${__WEBPACK_IMPORTED_MODULE_1__images_avatars__["a" /* default */].lib[portrait]}">`).insertAfter('#avatarList')
+  })
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="registerMenu" id="registerStart"><span id="registerMenu0" class="registerSelector"></span><span class="registerOption">Start</span></a>').appendTo('#dialogWindow')
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#registerMenu0').text('\u25B6')
+  
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      if (__WEBPACK_IMPORTED_MODULE_0_jquery___default()('#userName').val() !== '') {
+        startGame()
+      } else {
+        __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#userName').after('<span class="registerSelector" style="font-size: 16px;margin-top:1em;margin-left:1em;">\u25C0</span>')
+      }
+      
+    }
+  })
+}
+
+function selectDifficulty() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.diffSelector').empty()
+
+  const options = [
+    'diffMenu0', 'diffMenu1', 'diffMenu2'
+  ]
+
+  let counter = 0
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.diffSelector').empty()
+      counter -= 1
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) && counter !== 2) {
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.diffSelector').empty()
+      counter += 1
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          localStorage.difficulty = 1
+          break
+        case 1:
+          localStorage.difficulty = 2
+          break
+        case 2:
+          localStorage.difficulty = 3
+          break
+        default:
+          break
+      }
+      registerUser()
+    }
+  })
+}
+
+function newGame() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p>Choose your difficulty:</p>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="diffMenu" id="easy"><span id="diffMenu0" class="diffSelector"></span><span class="diffOption">Easy</span></a>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="diffMenu" id="normal"><span id="diffMenu1" class="diffSelector"></span><span class="diffOption">Normal</span></a>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="diffMenu" id="hard"><span id="diffMenu2" class="diffSelector"></span><span class="diffOption">Hard</span></a>').appendTo('#dialogWindow')
+  selectDifficulty()
+}
+
+function loadScores() {
+  if (Storage !== void(0)) {
+    if (localStorage.hiscores !== undefined) {
+      hiscores = JSON.parse(localStorage.hiscores)
+    } else {
+      localStorage.hiscores = JSON.stringify(hiscores)
+    }
+  }
+}
+
+function renderScores() {
+  hiscores.hiscores.map((score) => {
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<p><img src="${__WEBPACK_IMPORTED_MODULE_1__images_avatars__["a" /* default */].lib[score.avatar]}" style="display: inline-block">  ${score.name}................... Scandal: ${score.scandal}</p>`).appendTo('#statusWindow')
+  })
+}
+
+function hiScores() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').css('display', 'none')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').empty()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').css('display', 'block')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<h2 style="margin-left: 30%">HI-SCORES</h2>').appendTo('#statusWindow')
+  loadScores()
+  renderScores()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" id="back" style="margin-left: 75%"><span id="scoresDialog0" class="scoresSelector"></span><span class="scoresOption">Back</span></a>').appendTo('#statusWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#scoresDialog0').text('\u25B6')
+  
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      openMenu()
+    }
+  })
+}
+
+function introMenuSelector() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.introSelector').empty()
+
+  const options = [
+    'introMenu0', 'introMenu1', 'introMenu2'
+  ]
+
+  let counter = 0
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) && counter !== 0) {
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.introSelector').empty()
+      counter -= 1
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) && counter !== 2) {
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('.introSelector').empty()
+      counter += 1
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          newGame()
+          break
+        case 1:
+          hiScores()
+          break
+        case 2:
+          window.location = 'https://github.com/mothcrown'
+          break
+        default:
+          break
+      }
+    }
+  })
+}
+
+function openMenu() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').empty()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').css('display', 'none')
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseCurtain').css('display', 'block')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').css('display', 'block')
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="introMenu" id="newgame"><span id="introMenu0" class="introSelector"></span><span class="introOption">New Game</span></a>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="introMenu" id="scores"><span id="introMenu1" class="introSelector"></span><span class="introOption">Hi-Scores</span></a>').appendTo('#dialogWindow')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" class="introMenu" id="quit"><span id="introMenu2" class="introSelector"></span><span class="introOption">Quit</span></a>').appendTo('#dialogWindow')
+  introMenuSelector()
+}
+
+function showTitle() {
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<h1 class="title">Rumours</h1>').appendTo('#rumours')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<h2 class="subtitle">A game of whispers and scandal</h2>').appendTo('#rumours')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<h2 class="subtitle">A game of whispers and scandal</h2>').appendTo('#rumours')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p class="copyright">MOTHCROWN 1988(C)</p>').appendTo('#rumours')
+}
+
+const introState = {
+  preload: function () {
+    game = this.game
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off()
+  },
+  create: function () {
+    showTitle()
+    openMenu()
+    game.stage.backgroundColor = '#400000'
+  },
+  update: function () {
+
+  }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (introState);
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__img_avatar0_png__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__img_avatar0_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__img_avatar0_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_avatar1_png__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_avatar1_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__img_avatar1_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_avatar2_png__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_avatar2_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__img_avatar2_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_avatar3_png__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_avatar3_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__img_avatar3_png__);
+
+
+
+
+
+const avatars = {}
+
+avatars.lib = {
+  0: __WEBPACK_IMPORTED_MODULE_0__img_avatar0_png___default.a,
+  1: __WEBPACK_IMPORTED_MODULE_1__img_avatar1_png___default.a,
+  2: __WEBPACK_IMPORTED_MODULE_2__img_avatar2_png___default.a,
+  3: __WEBPACK_IMPORTED_MODULE_3__img_avatar3_png___default.a
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (avatars);
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/avatar0.png";
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/avatar1.png";
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/avatar2.png";
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/avatar3.png";
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+module.exports = {"hiscores":[{"name":"TDC","avatar":1,"scandal":3},{"name":"AMA","avatar":0,"scandal":4},{"name":"LUY","avatar":1,"scandal":5},{"name":"FER","avatar":2,"scandal":8}]}
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jquery___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jquery__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__images_sprites__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__names_titles__ = __webpack_require__(20);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__names_female__ = __webpack_require__(21);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__names_male__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__names_surnames__ = __webpack_require__(23);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__phaser_min__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__phaser_min___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__phaser_min__);
 /* global Phaser */
@@ -10550,11 +10850,15 @@ let guests
 let cursors
 let keys
 let waltz
+let waltzEvent
 let timer
+let scandalString
+let scandalScore
+let scandalText
 
 // Number of generated guests & rivals
 const guestNumber = 15
-const rivalNumber = 1
+const rivalNumber = (localStorage.difficulty !== undefined) ? +localStorage.difficulty : 2
 
 const playerVelocity = 150
 const guestVelocity = 75
@@ -10565,7 +10869,7 @@ const rumourList = [
   'reads those obscene French literates',
   'has a liason with the Countess',
   'has sympathies for the Magyar nationalists',
-  'has a secret son in London. Scandalous!',
+  'has a secret son in London',
   'has lost his fortune and filed for bankrupcy'
 ]
 
@@ -10615,8 +10919,14 @@ function gossipExchange(npc, success) {
   let message
   if (success) {
     message = 'Oh my! What a delicious piece of gossip...!'
+    player.scandal += 1
+    scandalText.text = scandalString + player.scandal
   } else {
     message = `That sounds quite interesting, but haven't you heard perchance that the ${npc.rumour.target.title} ${npc.rumour.target.surname} ${rumourList[npc.rumour.scandal - 1]}?`
+    // This is a really fun touch. Love it. I should be doing more core stuff, tho
+    if (npc.rumour.scandal > 3) {
+      message += ' Scandalous!'
+    }
   }
 
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<p>"${message}"</p>`).appendTo('#dialogWindow')
@@ -10788,7 +11098,7 @@ function rumourMenu(protagonist, npc) {
  */
 function guestInteract() {
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').empty()
-  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div id="pauseCurtain"></div>').prependTo('#rumours')
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseCurtain').css('display', 'block')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').css('display', 'block')
   const title = (player.gender === 'female') ? 'lady' : 'sir'
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<p>"Hmmm. Delighted to make your acquaintance, young ${title}."</p>`).appendTo('#dialogWindow')
@@ -10942,11 +11252,13 @@ function createGuests() {
 }
 
 /**
- * Let's create a villain!
+ * Let's create our villains!
  */
 function generateRivals() {
+  const rivalStyles = ['rivalmale1', 'rivalmale2', 'rivalmale3']
+
   for (let i = 0; i < rivalNumber; i += 1) {
-    const rival = rivals.create(game.world.randomX, game.world.randomY, 'rivalmale1')
+    const rival = rivals.create(game.world.randomX, game.world.randomY, rivalStyles[i])
     rival.anchor.set(0.5, 0.5)
     rival.body.collideWorldBounds = true
     rival.allowGravity = false
@@ -11008,19 +11320,45 @@ function shareRumours(guest1, guest2) {
  * @param {*} npc 
  */
 function rivalThrowsRumour(enemy, npc) {
+  const playas = ['player', 'rivalmale1', 'rivalmale2', 'rivalmale3']
+  const targetList = []
+
+  const totalShit = rivalNumber + 1
+
+  for (let i = 0; i < totalShit; i += 1) {
+    if (enemy.key !== playas[i]) {
+      targetList.push(playas[i])
+    }
+  }
+
+  const targetsLength = targetList.length
+  const targets = [player]
+
+  for (let i = 0; i < targetsLength; i += 1) {
+    rivals.forEach((rival) => {
+      if (rival.key === targetList[i]) {
+        targets.push(rival)
+      }
+    })
+  }
+
+  // Everybody gets shit here!
+  const targetRoll = Math.floor(Math.random() * targetsLength)
   const rumourRoll = Math.floor(Math.random() * 5)
   const rumour = {
     origin: enemy,
-    target: player,
+    target: targets[targetRoll],
     scandal: rumourRoll
   }
 
   if (npc.rumour !== undefined) {
     if (npc.rumour.scandal < rumour.scandal) {
       npc.rumour = rumour
-    } else {
-      npc.rumour = rumour
+      enemy.scandal += 1
     }
+  } else {
+    npc.rumour = rumour
+    enemy.scandal += 1
   }
 }
 
@@ -11053,14 +11391,14 @@ function bumpIntoPeople(sprite1, sprite2) {
     shareRumours(sprite1, sprite2)
   }
 
-  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest') {
+  if (sprite1.key.substring(0, 5) === 'rival' && sprite2.key.substring(0, 5) === 'guest' && sprite1.scandal < 9) {
     rivalThrowsRumour(sprite1, sprite2)
   }
 }
 
 function createKeys(playState) {
   keys = {
-    interact: playState.input.keyboard.addKey(Phaser.Keyboard.A),
+    interact: playState.input.keyboard.addKey(Phaser.Keyboard.Z),
     pause: playState.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
   }
 }
@@ -11102,6 +11440,7 @@ function unpauseGame() {
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseMenu').css('display', 'none')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#dialogWindow').css('display', 'none')
   game.paused = false
+  waltz.resume()
   pauseEvent()
 }
 
@@ -11118,7 +11457,7 @@ function innerSelection(option) {
   if (option === 'restart') {
     game.state.restart()
   } else {
-    window.location = 'https://github.com/mothcrown'
+    game.state.start('intro')
   }
 }
 
@@ -11128,7 +11467,7 @@ function innerSelection(option) {
  */
 function confirmWindow(option) {
   readyAuxWindow()
-  const message = (option === 'restart') ? 'start a new game' : 'quite the game'
+  const message = (option === 'restart') ? 'start a new game' : 'quit the game'
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<br /><br /><p>Are you sure you want to ${message}?</p>`).appendTo('#auxWindow')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" id="innerno"><span id="inner0" class="innerSelector"></span><span class="innerOption">No</span></a>').appendTo('#auxWindow')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<a href="" id="inneryes"><span id="inner1" class="innerSelector"></span><span class="innerOption">Yes</span></a>').appendTo('#auxWindow')
@@ -11224,8 +11563,9 @@ function pauseEvent() {
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = true
-      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<div id="pauseCurtain"></div>').prependTo('#rumours')
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseCurtain').css('display', 'block')
       __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseMenu').css('display', 'flex')
+      waltz.pause()
       menuSelection(0)
     }
   })
@@ -11235,19 +11575,71 @@ function pauseEvent() {
  * Need more time, need more time!
  * To be shown: most popular rumour, check if true else lose the game
  */
-function gameOver() {
+function waltzOver() {
   game.paused = true
+  waltz.stop()
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).off()
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').empty()
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').css('display', 'block')
-  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p>Ending yet to be implemented... sigh</p>').appendTo('#statusWindow')
+
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p>Most delicious rumours of the dance</p>').appendTo('#statusWindow')
+
+  const allRumours = []
+
+  guests.forEach((guest) => {
+    if (guest.rumour !== undefined) {
+      allRumours.push(guest.rumour)
+    }
+  })
+
+  const totalRumours = allRumours.length
+  const specificRumours = []
+  const rumoursFinal = []
+  
+  // TOO DAMN FUCKING COMPLEX
+  for (let i = 0; i < totalRumours; i += 1) {
+    const rumour = allRumours[i]
+    let rumourCount = 0
+    if (specificRumours.lenght = 0) {
+      specificRumours.push(rumour)
+      rumourCount += 1
+    } else {
+      for (let j = 0; j < specificRumours.lenght; j += 1) {
+        if (rumour === specificRumours[j]) {
+          rumourCount += 1
+        }
+      }
+
+      if (rumourCount === 0) {
+        specificRumours.push(rumour)
+        rumourCount += 1
+      }
+    }
+
+    rumoursFinal.push({ rumour, rumourCount })
+  }
+
+  specificRumours.map((rumour) => {
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()(`<p>${rumour.target.title} ${rumour.target.surname} ${rumourList[rumour.scandal - 1]}</p>`).appendTo('#statusWindow')
+  })
+
+  __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p>Thanks for playing this pretty clunky alpha of Rumours!</p>').appendTo('#statusWindow')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
   __WEBPACK_IMPORTED_MODULE_0_jquery___default()(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = false
+      __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').empty()
       __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#statusWindow').css('display', 'none')
-      game.state.restart()
+      game.state.start('intro')
     }
   })
+}
+
+function createUI() {
+  scandalString = 'Scandal: '
+  scandalScore = player.scandal
+  scandalText = game.add.text(450, 440, scandalString + scandalScore, { font: '28px VCR OSD Mono', fill: 'ghostwhite' })
 }
 
 /**
@@ -11256,21 +11648,28 @@ function gameOver() {
 const playState = {
   preload: function () {
     game = this.game
-    game.load.spritesheet('player', __WEBPACK_IMPORTED_MODULE_1__images__["a" /* default */].lib.player, 44, 104)
-    game.load.spritesheet('guestmale1', __WEBPACK_IMPORTED_MODULE_1__images__["a" /* default */].lib.guestmale1, 44, 104)
-    game.load.spritesheet('rivalmale1', __WEBPACK_IMPORTED_MODULE_1__images__["a" /* default */].lib.rivalmale1, 44, 104)
+    game.load.spritesheet('player', __WEBPACK_IMPORTED_MODULE_1__images_sprites__["a" /* default */].lib.player, 44, 104)
+    game.load.spritesheet('guestmale1', __WEBPACK_IMPORTED_MODULE_1__images_sprites__["a" /* default */].lib.guestmale1, 44, 104)
+    game.load.spritesheet('rivalmale1', __WEBPACK_IMPORTED_MODULE_1__images_sprites__["a" /* default */].lib.rivalmale1, 44, 104)
+    game.load.spritesheet('rivalmale2', __WEBPACK_IMPORTED_MODULE_1__images_sprites__["a" /* default */].lib.rivalmale2, 44, 104)
+    game.load.spritesheet('rivalmale3', __WEBPACK_IMPORTED_MODULE_1__images_sprites__["a" /* default */].lib.rivalmale3, 44, 104)
+
+    __WEBPACK_IMPORTED_MODULE_0_jquery___default()('#pauseCurtain').css('display', 'none')
   },
   create: function () {
     game.physics.startSystem(Phaser.Physics.ARCADE)
     createGuests()
     createRivals()
     createPlayer()
+    createUI()
     cursors = game.input.keyboard.createCursorKeys()
     createKeys(playState)
     game.stage.backgroundColor = '#400000'
     pauseEvent()
     timer = game.time.now
-    waltz = game.time.now
+    waltz = game.time.create()
+    waltzEvent = waltz.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 5, waltzOver, this)
+    waltz.start()
   },
   update: function () {
     playerAction()
@@ -11284,9 +11683,6 @@ const playState = {
     game.physics.arcade.collide(guests, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
-    if (game.time.now - waltz > 60000) {
-      gameOver()
-    }
   }
 }
 
@@ -11294,51 +11690,71 @@ const playState = {
 
 
 /***/ }),
-/* 7 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__img_playermale_png__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__img_playermale_png__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__img_playermale_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__img_playermale_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_guestmale1_png__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_guestmale1_png__ = __webpack_require__(16);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__img_guestmale1_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__img_guestmale1_png__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png__ = __webpack_require__(17);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_rivalmale2_png__ = __webpack_require__(18);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__img_rivalmale2_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__img_rivalmale2_png__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_rivalmale3_png__ = __webpack_require__(19);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__img_rivalmale3_png___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__img_rivalmale3_png__);
 
 
 
 
-const images = {}
 
-images.lib = {
+
+const sprites = {}
+
+sprites.lib = {
   player: __WEBPACK_IMPORTED_MODULE_0__img_playermale_png___default.a,
   guestmale1: __WEBPACK_IMPORTED_MODULE_1__img_guestmale1_png___default.a,
-  rivalmale1: __WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png___default.a
+  rivalmale1: __WEBPACK_IMPORTED_MODULE_2__img_rivalmale1_png___default.a,
+  rivalmale2: __WEBPACK_IMPORTED_MODULE_3__img_rivalmale2_png___default.a,
+  rivalmale3: __WEBPACK_IMPORTED_MODULE_4__img_rivalmale3_png___default.a
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (images);
+/* harmony default export */ __webpack_exports__["a"] = (sprites);
 
 
 /***/ }),
-/* 8 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "images/playermale.png";
 
 /***/ }),
-/* 9 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "images/guestmale1.png";
 
 /***/ }),
-/* 10 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "images/rivalmale1.png";
 
 /***/ }),
-/* 11 */
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/rivalmale2.png";
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "images/rivalmale3.png";
+
+/***/ }),
+/* 20 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11361,7 +11777,7 @@ const titles = [
 
 
 /***/ }),
-/* 12 */
+/* 21 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11374,7 +11790,7 @@ const names = [
 
 
 /***/ }),
-/* 13 */
+/* 22 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11387,7 +11803,7 @@ const names = [
 
 
 /***/ }),
-/* 14 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11407,13 +11823,13 @@ const surnames = [
 
 
 /***/ }),
-/* 15 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(16);
+var content = __webpack_require__(25);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -11421,7 +11837,7 @@ var transform;
 var options = {"hmr":true}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(20)(content, options);
+var update = __webpack_require__(29)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -11438,22 +11854,22 @@ if(false) {
 }
 
 /***/ }),
-/* 16 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(17);
-exports = module.exports = __webpack_require__(18)(false);
+var escape = __webpack_require__(26);
+exports = module.exports = __webpack_require__(27)(false);
 // imports
 
 
 // module
-exports.push([module.i, "@font-face {\n  font-family: \"VCR OSD Mono\";\n  src: url(" + escape(__webpack_require__(19)) + "); }\n\nbody {\n  color: floralwhite;\n  box-sizing: border-box;\n  background-color: black;\n  font-family: VCR OSD Mono; }\n\nh2 {\n  font-weight: normal; }\n\n#rumours {\n  position: relative;\n  margin: auto;\n  left: 0;\n  right: 0;\n  width: 700px; }\n\n#pauseCurtain {\n  position: absolute;\n  width: 640px;\n  height: 480px;\n  background-color: rgba(0, 0, 0, 0.5); }\n\n#pauseMenu {\n  font-family: VCR OSD Mono;\n  position: absolute;\n  display: none;\n  flex-flow: column nowrap;\n  justify-content: space-between;\n  width: 30%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.5);\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #pauseMenu div {\n    position: relative; }\n  #pauseMenu div:first-of-type {\n    padding-top: 1em; }\n  #pauseMenu a {\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    display: block;\n    width: 100%;\n    height: 100%; }\n\n#auxWindow {\n  font-family: VCR OSD Mono;\n  position: absolute;\n  display: none;\n  left: 31%;\n  width: 60%;\n  height: 50%;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #auxWindow a {\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    display: inline-block;\n    width: 40%; }\n\n.selector, .innerSelector, .rumourSelector, .throwSelector {\n  font-size: 80%;\n  display: inline-block;\n  width: 2em;\n  vertical-align: top; }\n\n#pauseText {\n  font-family: VCR OSD Mono;\n  font-weight: normal;\n  font-size: 200%;\n  position: absolute;\n  z-index: 2;\n  top: 40%;\n  left: 37%; }\n\n#dialogWindow {\n  font-family: VCR OSD Mono;\n  display: none;\n  position: absolute;\n  width: 88%;\n  height: 30%;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #dialogWindow a {\n    display: block;\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none; }\n  #dialogWindow select {\n    cursor: pointer;\n    font-family: \"Bookman Old Style\";\n    margin-top: 1em; }\n\n#rumourMenuChoices {\n  position: relative;\n  bottom: 0;\n  padding-left: 50%; }\n  #rumourMenuChoices a {\n    display: inline-block;\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    width: 30%; }\n\n#statusWindow {\n  font-family: VCR OSD Mono;\n  display: none;\n  position: absolute;\n  width: 50%;\n  height: 100%;\n  margin-left: 20%;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n\n#rumourChoices {\n  cursor: pointer; }\n", ""]);
+exports.push([module.i, "@font-face {\n  font-family: \"VCR OSD Mono\";\n  src: url(" + escape(__webpack_require__(28)) + "); }\n\nbody {\n  color: floralwhite;\n  box-sizing: border-box;\n  background-color: black;\n  font-family: VCR OSD Mono; }\n\nh2 {\n  font-weight: normal; }\n\n#rumours {\n  position: relative;\n  margin: auto;\n  left: 0;\n  right: 0;\n  width: 700px; }\n\n#pauseCurtain {\n  position: absolute;\n  width: 640px;\n  height: 480px;\n  background-color: rgba(0, 0, 0, 0.5); }\n\n#pauseMenu {\n  font-family: VCR OSD Mono;\n  position: absolute;\n  display: none;\n  flex-flow: column nowrap;\n  justify-content: space-between;\n  width: 30%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.5);\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #pauseMenu div {\n    position: relative; }\n  #pauseMenu div:first-of-type {\n    padding-top: 1em; }\n  #pauseMenu a {\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    display: block;\n    width: 100%;\n    height: 100%; }\n\n#auxWindow {\n  font-family: VCR OSD Mono;\n  position: absolute;\n  display: none;\n  left: 31%;\n  width: 60%;\n  height: 50%;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #auxWindow a {\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    display: inline-block;\n    width: 40%; }\n\n.selector, .innerSelector, .rumourSelector, .throwSelector, .introSelector, .scoresSelector, .diffSelector, .registerSelector {\n  font-size: 80%;\n  display: inline-block;\n  width: 2em;\n  vertical-align: top; }\n\n#pauseText {\n  font-family: VCR OSD Mono;\n  font-weight: normal;\n  font-size: 200%;\n  position: absolute;\n  z-index: 2;\n  top: 40%;\n  left: 37%; }\n\n#dialogWindow {\n  font-family: VCR OSD Mono;\n  display: none;\n  position: absolute;\n  width: 88%;\n  height: 30%;\n  bottom: 0;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #dialogWindow a {\n    display: block;\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none; }\n  #dialogWindow select {\n    cursor: pointer;\n    font-family: \"Bookman Old Style\";\n    margin-top: 1em; }\n\n#rumourMenuChoices {\n  position: relative;\n  bottom: 0;\n  padding-left: 50%; }\n  #rumourMenuChoices a {\n    display: inline-block;\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none;\n    width: 30%; }\n\n#statusWindow {\n  font-family: VCR OSD Mono;\n  display: none;\n  position: absolute;\n  width: 50%;\n  height: 100%;\n  margin-left: 18%;\n  background-color: rgba(0, 0, 0, 0.5);\n  padding-left: 1em;\n  z-index: 2;\n  border: 3px solid darkgoldenrod;\n  border-radius: 0.5em; }\n  #statusWindow a {\n    display: block;\n    padding: .5em;\n    color: floralwhite;\n    text-decoration: none; }\n  #statusWindow select {\n    cursor: pointer;\n    font-family: \"Bookman Old Style\";\n    margin-top: 1em; }\n\n#rumourChoices {\n  cursor: pointer; }\n\n.title {\n  position: absolute;\n  font-size: 64px;\n  top: 10%;\n  left: 25%;\n  -webkit-text-stroke: 1px darkgoldenrod;\n  text-stroke: 1px darkgoldenrod;\n  text-shadow: 1px 1px 1px black; }\n\n.subtitle {\n  position: absolute;\n  top: 28%;\n  left: 14%; }\n\n.copyright {\n  position: absolute;\n  font-size: 12px;\n  top: 37%;\n  left: 35%; }\n\n.introMenu {\n  margin-left: 33%; }\n  .introMenu:first-of-type {\n    margin-top: 2%; }\n\n.diffMenu {\n  margin-left: 33%; }\n  .diffMenu:first-of-type {\n    margin-top: -2%; }\n\n.registerMenu {\n  margin-left: 75%; }\n\n#portrait {\n  margin-left: 1em; }\n", ""]);
 
 // exports
 
 
 /***/ }),
-/* 17 */
+/* 26 */
 /***/ (function(module, exports) {
 
 module.exports = function escape(url) {
@@ -11475,7 +11891,7 @@ module.exports = function escape(url) {
 
 
 /***/ }),
-/* 18 */
+/* 27 */
 /***/ (function(module, exports) {
 
 /*
@@ -11557,13 +11973,13 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 19 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "fonts/VCR_OSD_MONO_1.001.ttf";
 
 /***/ }),
-/* 20 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -11619,7 +12035,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(21);
+var	fixUrls = __webpack_require__(30);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -11935,7 +12351,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 21 */
+/* 30 */
 /***/ (function(module, exports) {
 
 

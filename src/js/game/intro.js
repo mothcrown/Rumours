@@ -10,7 +10,9 @@ import avatars from './images/avatars'
 let hiscores = require('./../../json/hiscores.json')
 
 let game
-
+/** 
+* Starts the game, duh!
+*/
 function startGame() {
   const player = {}
   player.name = $('#userName').val()
@@ -53,7 +55,12 @@ function registerUser() {
   
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
-      startGame()
+      if ($('#userName').val() !== '') {
+        startGame()
+      } else {
+        $('#userName').after('<span class="registerSelector" style="font-size: 16px;margin-top:1em;margin-left:1em;">\u25C0</span>')
+      }
+      
     }
   })
 }
