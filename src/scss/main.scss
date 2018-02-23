@@ -173,9 +173,10 @@ h2 {
   position: absolute;
   width: 50%;
   height: 100%;
-  margin-left: 20%;
+  margin-left: 16%;
   background-color: rgba(0, 0, 0, 0.5);
   padding-left: 1em;
+  z-index: 2;
   @include border(3px, solid, darkgoldenrod);
   @include borderradius;
 }

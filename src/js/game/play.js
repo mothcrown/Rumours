@@ -5,7 +5,7 @@
 
 // Imports
 import $ from 'jquery'
-import images from './images'
+import sprites from './images/sprites'
 import titles from './names/titles'
 import femaleNames from './names/female'
 import maleNames from './names/male'
@@ -728,9 +728,9 @@ function gameOver() {
 const playState = {
   preload: function () {
     game = this.game
-    game.load.spritesheet('player', images.lib.player, 44, 104)
-    game.load.spritesheet('guestmale1', images.lib.guestmale1, 44, 104)
-    game.load.spritesheet('rivalmale1', images.lib.rivalmale1, 44, 104)
+    game.load.spritesheet('player', sprites.lib.player, 44, 104)
+    game.load.spritesheet('guestmale1', sprites.lib.guestmale1, 44, 104)
+    game.load.spritesheet('rivalmale1', sprites.lib.rivalmale1, 44, 104)
 
     $('#pauseCurtain').css('display', 'none')
   },

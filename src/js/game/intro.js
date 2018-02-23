@@ -8,6 +8,14 @@ import $ from 'jquery'
 
 let game
 
+function hiScores() {
+  $(document).off()
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'none')
+  $('#statusWindow').empty()
+  $('#statusWindow').css('display', 'block')
+}
+
 function introMenuSelector() {
   $('.introSelector').empty()
 
