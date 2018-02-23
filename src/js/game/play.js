@@ -412,7 +412,7 @@ function createGuests() {
 }
 
 /**
- * Let's create a villain!
+ * Let's create our villains!
  */
 function generateRivals() {
   const rivalStyles = ['rivalmale1', 'rivalmale2', 'rivalmale3']
@@ -480,10 +480,32 @@ function shareRumours(guest1, guest2) {
  * @param {*} npc 
  */
 function rivalThrowsRumour(enemy, npc) {
+  const playas = ['player', 'rivalmale1', 'rivalmale2', 'rivalmale3']
+  const targetList = []
+
+  playas.map((id) => {
+    if (enemy.key !== id) {
+      targetList.push(id)
+    }
+  })
+
+  const targetsLength = targetList.length
+  const targets = [player]
+
+  for (let i = 0; i < targetsLength; i += 1) {
+    rivals.forEach((rival) => {
+      if (rival.key === targetList[i]) {
+        targets.push(rival)
+      }
+    })
+  }
+
+  // Everybody gets shit here!
+  const targetRoll = Math.floor(Math.random() * targetsLength)
   const rumourRoll = Math.floor(Math.random() * 5)
   const rumour = {
     origin: enemy,
-    target: player,
+    target: targets[targetRoll],
     scandal: rumourRoll
   }
 
