@@ -120,6 +120,10 @@ h2 {
   @extend %selector;
 }
 
+.scoresSelector {
+  @extend %selector;
+}
+
 #pauseText {
   font-family: VCR OSD Mono;
   font-weight: normal;
@@ -179,6 +183,17 @@ h2 {
   z-index: 2;
   @include border(3px, solid, darkgoldenrod);
   @include borderradius;
+  a {
+    display: block;
+    padding: .5em;
+    color: floralwhite;
+    text-decoration: none;
+  }
+  select {
+    cursor: pointer;
+    font-family: "Bookman Old Style";
+    margin-top: 1em;
+  }
 }
 
 #rumourChoices {

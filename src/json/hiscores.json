@@ -2,18 +2,23 @@
   "hiscores": [
     {
       "name": "TDC",
-      "avatar": 
+      "avatar": 1,
       "scandal": 3
     },
     {
-      "name": "MTC",
-      "scandal": 7
+      "name": "AMA",
+      "avatar": 0,
+      "scandal": 4
     },
     {
-      "name": "MTC",
-      "scandal": 7
+      "name": "LUY",
+      "avatar": 1,
+      "scandal": 5
+    },
+    {
+      "name": "FER",
+      "avatar": 2,
+      "scandal": 8
     }
-    
-
   ]
 }
