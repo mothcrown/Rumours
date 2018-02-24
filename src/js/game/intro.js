@@ -29,6 +29,9 @@ function startGame() {
   game.state.start('play')
 }
 
+/**
+ * I'm sure there is a more sane way to do this.
+ */
 function registerUser() {
   $(document).off()
   $('#dialogWindow').empty()
@@ -136,6 +139,9 @@ function renderScores() {
   })
 }
 
+/**
+ * This looks badass!
+ */
 function hiScores() {
   $(document).off()
   $('#dialogWindow').empty()
