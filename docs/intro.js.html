@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: intro.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: intro.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* global Phaser */
+/* eslint object-shorthand: ["error", "never"] */
+/* eslint no-param-reassign: [2, { "props": false }] */
+/* eslint no-use-before-define: ["error", { "functions": false }] */
+
+// Imports
+import $ from 'jquery'
+import avatars from './images/avatars'
+
+let hiscores = require('./../../json/hiscores.json')
+
+let game
+/** 
+* Starts the game, duh!
+*/
+function startGame() {
+  const player = {}
+  player.name = $('#userName').val()
+  player.avatar = $('#avatarList').val()
+
+  localStorage.player = JSON.stringify(player)
+
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'none')
+  $('.title').remove()
+  $('.subtitle').remove()
+  $('.copyright').remove()
+
+  game.state.start('play')
+}
+
+function registerUser() {
+  $(document).off()
+  $('#dialogWindow').empty()
+
+  $('&lt;p style="display: inline-block; margin-right: 1em">Insert your name (3 letter max!):&lt;/p>').appendTo('#dialogWindow')
+  $('&lt;input type="text" id="userName" maxlength="3" style="width: 10%" pattern="[A-Z]{3}">&lt;br/>').appendTo('#dialogWindow')
+  $('&lt;p style="display: inline-block; margin-top: 0; margin-right: 1em">Select your portrait:&lt;/p>').appendTo('#dialogWindow')
+  $('&lt;select id="avatarList">&lt;/select>').appendTo('#dialogWindow')
+  $('&lt;option value="0">-- Choose portrait --&lt;/option>').appendTo('#avatarList')
+  
+  Object.keys(avatars.lib).map((avatar) => {
+    $(`&lt;option value="${avatar}">Portrait ${avatar}&lt;/option>`).appendTo('#avatarList')
+  })
+
+  $('#avatarList').change(() => {
+    $('#portrait').remove()
+    const portrait = $('#avatarList').val()
+    $(`&lt;img id="portrait" src="${avatars.lib[portrait]}">`).insertAfter('#avatarList')
+  })
+
+  $('&lt;a href="" class="registerMenu" id="registerStart">&lt;span id="registerMenu0" class="registerSelector">&lt;/span>&lt;span class="registerOption">Start&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+
+  $('#registerMenu0').text('\u25B6')
+  
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      if ($('#userName').val() !== '') {
+        const player = {
+          name: $('#userName').val(),
+          avatar: $('#avatarList').val()
+        }
+        localStorage.player = JSON.stringify(player)
+        startGame()
+      } else {
+        $('#userName').after('&lt;span class="registerSelector" style="font-size: 16px;margin-top:1em;margin-left:1em;">\u25C0&lt;/span>')
+      }
+    }
+  })
+}
+
+function selectDifficulty() {
+  $('.diffSelector').empty()
+
+  const options = [
+    'diffMenu0', 'diffMenu1', 'diffMenu2'
+  ]
+
+  let counter = 0
+  $(`#${options[counter]}`).text('\u25B6')
+
+  $(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) &amp;&amp; counter !== 0) {
+      $('.diffSelector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) &amp;&amp; counter !== 2) {
+      $('.diffSelector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          localStorage.difficulty = 1
+          break
+        case 1:
+          localStorage.difficulty = 2
+          break
+        case 2:
+          localStorage.difficulty = 3
+          break
+        default:
+          break
+      }
+      registerUser()
+    }
+  })
+}
+
+function newGame() {
+  $(document).off()
+  $('#dialogWindow').empty()
+
+  $('&lt;p>Choose your difficulty:&lt;/p>').appendTo('#dialogWindow')
+  $('&lt;a href="" class="diffMenu" id="easy">&lt;span id="diffMenu0" class="diffSelector">&lt;/span>&lt;span class="diffOption">Easy&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  $('&lt;a href="" class="diffMenu" id="normal">&lt;span id="diffMenu1" class="diffSelector">&lt;/span>&lt;span class="diffOption">Normal&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  $('&lt;a href="" class="diffMenu" id="hard">&lt;span id="diffMenu2" class="diffSelector">&lt;/span>&lt;span class="diffOption">Hard&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  selectDifficulty()
+}
+
+function loadScores() {
+  if (Storage !== void(0)) {
+    if (localStorage.hiscores !== undefined) {
+      hiscores = JSON.parse(localStorage.hiscores)
+    } else {
+      localStorage.hiscores = JSON.stringify(hiscores)
+    }
+  }
+}
+
+function renderScores() {
+  hiscores.hiscores.map((score) => {
+    $(`&lt;p>&lt;img src="${avatars.lib[score.avatar]}" style="display: inline-block">  ${score.name}................... Scandal: ${score.scandal}&lt;/p>`).appendTo('#statusWindow')
+  })
+}
+
+function hiScores() {
+  $(document).off()
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'none')
+  $('#statusWindow').empty()
+  $('#statusWindow').css('display', 'block')
+  $('&lt;h2 style="margin-left: 30%">HI-SCORES&lt;/h2>').appendTo('#statusWindow')
+  loadScores()
+  renderScores()
+  $('&lt;a href="" id="back" style="margin-left: 75%">&lt;span id="scoresDialog0" class="scoresSelector">&lt;/span>&lt;span class="scoresOption">Back&lt;/span>&lt;/a>').appendTo('#statusWindow')
+  $('#scoresDialog0').text('\u25B6')
+  
+  $(document).keydown((event) => {
+    if (event.which === 32 || event.keyCode === 32) {
+      openMenu()
+    }
+  })
+}
+
+function introMenuSelector() {
+  $('.introSelector').empty()
+
+  const options = [
+    'introMenu0', 'introMenu1', 'introMenu2'
+  ]
+
+  let counter = 0
+  $(`#${options[counter]}`).text('\u25B6')
+
+  $(document).keydown((event) => {
+    if ((event.which === 38 || event.keyCode === 38) &amp;&amp; counter !== 0) {
+      $('.introSelector').empty()
+      counter -= 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if ((event.which === 40 || event.keyCode === 40) &amp;&amp; counter !== 2) {
+      $('.introSelector').empty()
+      counter += 1
+      $(`#${options[counter]}`).text('\u25B6')
+    }
+    if (event.which === 32 || event.keyCode === 32) {
+      switch (counter) {
+        case 0:
+          newGame()
+          break
+        case 1:
+          hiScores()
+          break
+        case 2:
+          window.location = 'https://github.com/mothcrown'
+          break
+        default:
+          break
+      }
+    }
+  })
+}
+
+function openMenu() {
+  $('#statusWindow').empty()
+  $('#statusWindow').css('display', 'none')
+
+  $('#pauseCurtain').css('display', 'block')
+  $('#dialogWindow').empty()
+  $('#dialogWindow').css('display', 'block')
+
+  $('&lt;a href="" class="introMenu" id="newgame">&lt;span id="introMenu0" class="introSelector">&lt;/span>&lt;span class="introOption">New Game&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  $('&lt;a href="" class="introMenu" id="scores">&lt;span id="introMenu1" class="introSelector">&lt;/span>&lt;span class="introOption">Hi-Scores&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  $('&lt;a href="" class="introMenu" id="quit">&lt;span id="introMenu2" class="introSelector">&lt;/span>&lt;span class="introOption">Quit&lt;/span>&lt;/a>').appendTo('#dialogWindow')
+  introMenuSelector()
+}
+
+function showTitle() {
+  $('&lt;h1 class="title">Rumours&lt;/h1>').appendTo('#rumours')
+  $('&lt;h2 class="subtitle">A game of whispers and scandal&lt;/h2>').appendTo('#rumours')
+  $('&lt;h2 class="subtitle">A game of whispers and scandal&lt;/h2>').appendTo('#rumours')
+  $('&lt;p class="copyright">MOTHCROWN 1988(C)&lt;/p>').appendTo('#rumours')
+}
+
+const introState = {
+  preload: function () {
+    game = this.game
+    $(document).off()
+  },
+  create: function () {
+    showTitle()
+    openMenu()
+    game.stage.backgroundColor = '#400000'
+  },
+  update: function () {
+
+  }
+}
+
+export default introState
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#startGame">startGame</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Feb 24 2018 02:53:25 GMT+0000 (Hora estándar GMT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
