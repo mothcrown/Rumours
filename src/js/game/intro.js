@@ -56,11 +56,15 @@ function registerUser() {
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       if ($('#userName').val() !== '') {
+        const player = {
+          name: $('#userName').val(),
+          avatar: $('#avatarList').val()
+        }
+        localStorage.player = JSON.stringify(player)
         startGame()
       } else {
         $('#userName').after('<span class="registerSelector" style="font-size: 16px;margin-top:1em;margin-left:1em;">\u25C0</span>')
       }
-      
     }
   })
 }

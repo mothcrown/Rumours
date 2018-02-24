@@ -25,6 +25,9 @@ let timer
 let scandalString
 let scandalScore
 let scandalText
+let waltzString
+let waltzClock
+let waltzText
 
 // Number of generated guests & rivals
 const guestNumber = 15
@@ -514,7 +517,7 @@ function rivalThrowsRumour(enemy, npc) {
 
   // Everybody gets shit here!
   const targetRoll = Math.floor(Math.random() * targetsLength)
-  const rumourRoll = Math.floor(Math.random() * 5)
+  const rumourRoll = Math.floor((Math.random() * 5) + 1)
   const rumour = {
     origin: enemy,
     target: targets[targetRoll],
@@ -741,6 +744,32 @@ function pauseEvent() {
   })
 }
 
+function compare(a, b) {
+  let value
+  if (a.popularity < b.popularity) {
+    value = 1
+  } else if (a.popularity > b.popularity) {
+    value = -1
+  } else {
+    value = 0
+  }
+  return value
+}
+
+/**
+* You deserve a reward!
+*/
+function addScore() {
+  const hiscores = JSON.parse(localStorage.hiscores)
+  const user = JSON.parse(localStorage.player)
+  hiscores.hiscores.push({
+    name: user.name,
+    avatar: user.avatar,
+    scandal: player.scandal
+  })
+  localStorage.hiscores = JSON.stringify(hiscores)
+}
+
 /**
  * Need more time, need more time!
  * To be shown: most popular rumour, check if true else lose the game
@@ -754,48 +783,83 @@ function waltzOver() {
 
 
   $('<p>Most delicious rumours of the dance</p>').appendTo('#statusWindow')
+  $('<p>-----------------------------------</p>').appendTo('#statusWindow')
 
-  const allRumours = []
+  const specificRumours = []
 
   guests.forEach((guest) => {
     if (guest.rumour !== undefined) {
-      allRumours.push(guest.rumour)
+      // allRumours.push(guest.rumour)
+      const foundRumour = specificRumours.find((rumour) => {
+        return rumour === guest.rumour
+      })
+      if (foundRumour === undefined) {
+        specificRumours.push(guest.rumour)
+      }
     }
   })
 
-  const totalRumours = allRumours.length
-  const specificRumours = []
-  const rumoursFinal = []
-  
-  // TOO DAMN FUCKING COMPLEX
-  for (let i = 0; i < totalRumours; i += 1) {
-    const rumour = allRumours[i]
-    let rumourCount = 0
-    if (specificRumours.lenght = 0) {
-      specificRumours.push(rumour)
-      rumourCount += 1
-    } else {
-      for (let j = 0; j < specificRumours.lenght; j += 1) {
-        if (rumour === specificRumours[j]) {
-          rumourCount += 1
-        }
-      }
+  const popRumoursList = []
 
-      if (rumourCount === 0) {
-        specificRumours.push(rumour)
-        rumourCount += 1
-      }
-    }
+  const specRumoursLength = specificRumours.length
 
-    rumoursFinal.push({ rumour, rumourCount })
+  for (let i = 0; i < specRumoursLength; i += 1) {
+    const rumour = specificRumours[i]
+    let rumourPopularity = 0
+    guests.forEach((guest) => {
+      if (guest.rumour === rumour) {
+        rumourPopularity += 1
+      }
+    })
+
+    popRumoursList.push({
+      rumour: rumour,
+      popularity: rumourPopularity
+    })
   }
 
-  specificRumours.map((rumour) => {
-    $(`<p>${rumour.target.title} ${rumour.target.surname} ${rumourList[rumour.scandal - 1]}</p>`).appendTo('#statusWindow')
+  popRumoursList.sort(compare)
+  const auxLength = (popRumoursList.length > 3) ? 3 : popRumoursList.length
+
+  for (let i = 0; i < auxLength; i += 1) {
+    const rumour = popRumoursList[i].rumour
+    let message
+    const auxRumour = +rumour.scandal - 1
+    if (rumourList[auxRumour] === rumour.target.secret) {
+      message = 'And it\'s true!'
+      if (rumour.target.key === 'player') {
+        message += ' Your secrets are laid bare for the court to enjoy. The Scandal will haunt you forever.'
+      }
+      if (rumour.origin.key === 'player') {
+        message += ' The Countess smiles at you.'
+      }
+      rumour.target.scandal += (rumour.scandal * 2)
+      scandalText.text = scandalString + player.scandal
+    } else {
+      message = 'And it\'s not true!'
+      if (rumour.origin.key === 'player') {
+        message += ' You earn Scandal for gossiping about your betters.'
+      }
+      rumour.origin.scandal += rumour.scandal
+      scandalText.text = scandalString + player.scandal
+    }
+    $(`<p>The ${rumour.target.title} ${rumour.target.surname} ${rumourList[rumour.scandal - 1]}. ${message}</p>`).appendTo('#statusWindow')
+  }
+
+  rivals.forEach((rival) => {
+    if (rival.scandal > 10) {
+      $(`<p>The ${rival.title} ${rival.surname} leaves the party after embarrassing himself.</p>`).appendTo('#statusWindow')
+    }
   })
 
-  $('<p>Thanks for playing this pretty clunky alpha of Rumours!</p>').appendTo('#statusWindow')
-  $('<p>Press spacebar to restart...</p>').appendTo('#statusWindow')
+  if (player.scandal > 10) {
+    $('<p style="margin-top: 1em">You became the laughing stock of your peers. You go back to the countryside to never return.</p>').appendTo('#statusWindow')
+  } else {
+    $('<p style="margin-top: 1em">You survived your first bout with the court. Maybe there is a place for you amongst the sharp tongues and cruel smiles around you...</p>').appendTo('#statusWindow')
+    addScore()
+  }
+
+  $('<p style="margin-top: 1em">Press spacebar to restart...</p>').appendTo('#statusWindow')
   $(document).keydown((event) => {
     if (event.which === 32 || event.keyCode === 32) {
       game.paused = false
@@ -806,10 +870,21 @@ function waltzOver() {
   })
 }
 
+function formatTime(s) {
+  const minutes = `0${Math.floor(s / 60)}`
+  const seconds = `0${s - minutes * 60}`
+  return `${minutes.substr(-2)}:${seconds.substr(-2)}`
+}
+
+/**
+ * Simple stuff
+ * */
 function createUI() {
   scandalString = 'Scandal: '
   scandalScore = player.scandal
   scandalText = game.add.text(450, 440, scandalString + scandalScore, { font: '28px VCR OSD Mono', fill: 'ghostwhite' })
+  
+  
 }
 
 /**
@@ -828,6 +903,11 @@ const playState = {
   },
   create: function () {
     game.physics.startSystem(Phaser.Physics.ARCADE)
+    timer = game.time.now
+    waltz = game.time.create()
+    waltzEvent = waltz.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 30, waltzOver, this)
+    waltz.start()
+    waltzText = game.add.text(325, 10, waltzString + waltzClock, { font: '22px VCR OSD Mono', fill: 'ghostwhite' })
     createGuests()
     createRivals()
     createPlayer()
@@ -836,10 +916,6 @@ const playState = {
     createKeys(playState)
     game.stage.backgroundColor = '#400000'
     pauseEvent()
-    timer = game.time.now
-    waltz = game.time.create()
-    waltzEvent = waltz.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 5, waltzOver, this)
-    waltz.start()
   },
   update: function () {
     playerAction()
@@ -853,6 +929,22 @@ const playState = {
     game.physics.arcade.collide(guests, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, guests, bumpIntoPeople, null, this)
     game.physics.arcade.collide(rivals, rivals, bumpIntoPeople, null, this)
+  },
+  render: function () {
+    if (waltz.running) {
+      waltzString = 'End of the waltz: '
+      waltzClock = formatTime(Math.round((waltzEvent.delay - waltz.ms) / 1000))
+      waltzText.text = waltzString + waltzClock
+      waltzText.bringToTop()
+    }
+  },
+  endTimer: () => {
+    waltz.stop()
+  },
+  formatTime: (sec) => {
+    const minutes = '0' + Math.floor(sec / 60)
+    const seconds = '0' + (sec - minutes * 60)
+    return minutes.substr(-2) + ':' + seconds.substr(-2)
   }
 }
 
